@@ -29,12 +29,13 @@ export function CardProg({texto, numero, corFundo, textoBaixo, horas,para}: Prop
      >
         <div style={{display: "flex", alignItems: "center", gap: "50px"}}>
           <img src="../imagens/" alt="" />
-          <div style={{display: "flex", flexDirection: "row", gap:"520px"}}>
+          <div style={{display: "flex", flexDirection: "row", gap:"520px"}}
+          className="testeblur">
             <h1 style={{ color: "black", padding:"10px" }}>{horas}</h1>
             <h1 style={{ color: "black", padding:"10px"}}>{texto}</h1>
           </div>
         </div>
-        <hr style={{ color: "black", width:"100%"}}/>
+        {/* <hr style={{ color: "black", width:"100%"}}/> */}
 
         <p className="paragra">
          {para}

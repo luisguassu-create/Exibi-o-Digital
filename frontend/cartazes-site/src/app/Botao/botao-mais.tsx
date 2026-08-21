@@ -19,8 +19,8 @@ export function Botemais({ corFundo, opcoes }: Props) {
             <button
                 onClick={() => setAberto(!aberto)}
                 style={{
-                                            position: "absolute",
-                                            bottom: "-17px",
+                    position: "absolute",
+                    bottom: "-17px",
                     background: corFundo,
                     color: "black",
                     border: "none",

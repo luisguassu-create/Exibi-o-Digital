@@ -1,6 +1,7 @@
 import { Bote } from "../Botao/botao-ee";
 import Image from 'next/image'
 import patoImg from '../../../public/assets/images/pato.jpg' 
+import { Botexc } from "../Botao/botao-exclu";
 
 type Props = {
     texto: string,
@@ -41,7 +42,7 @@ export function CardCartaz({texto, numero, corFundo, textoBaixo}: Props){
         <div style={{display: "flex", gap: 30, justifyContent: "end ", alignItems: "center"}}>
         
         <Bote texto={"Editar"} corFundo={""} />
-        <Bote texto={"Excluir"} corFundo={""} />
+        <Botexc texto={"Excluir"} corFundo={""} />
        
  </div>
       

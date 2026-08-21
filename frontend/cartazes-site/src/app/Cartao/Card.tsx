@@ -15,7 +15,7 @@ export function Cards({texto, numero, corFundo, textoBaixo, corTexto}: Props){
             width: "300px",
             height: "120px",
             background: corFundo,
-             boxShadow: "8px 8px 28px 0px rgba(0,0,0,0.41)"
+            //  boxShadow: "8px 8px 28px 0px rgba(0,0,0,0.41)"
         }}
      >
         <h1 style={{ color: corTexto, padding:"10px"}}>{texto}</h1>

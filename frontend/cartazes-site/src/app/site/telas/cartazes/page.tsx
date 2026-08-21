@@ -13,15 +13,14 @@ export default function Cartzes() {
             }}>
             <div className="paralelo">
             <h1>Cartazes</h1>
-            <Bot texto={"Novo Cartaz"} corFundo={"#0f1899"} />
+            <Bot texto={"Novo Cartaz"} corFundo={"#d10000"} />
             </div>
             <hr />
     
               
             <CardCartaz texto={"Prova amanha"} corFundo={""} textoBaixo={"de 10 as 25"} />
             <CardCartaz texto={"Evento Sexta"} corFundo={""} textoBaixo={"de 20 as 4"} />
-            <CardCartaz texto={"Intervalo"} corFundo={""} textoBaixo={"de 9 as 9 e 15"} />
-       
+           
                
         </div>
     );

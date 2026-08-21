@@ -6,12 +6,12 @@ export default function Home() {
 
     
     <div className="dash" >
-      <h1>Dashboard</h1>
+      <h1>Início</h1>
       <hr />
       <div className="cartooes">
-        <Cards texto={"Cartazes Ativos"} numero={12} corFundo={"rgb(51, 52, 60)"} corTexto={"white"} />
-        <Cards texto={"Hoje"} numero={8} corFundo={"rgb(99, 102, 130)"} textoBaixo={"em exibição"} corTexto={"white"} />
-        <Cards texto={"Hoje"} numero={8} corFundo={"rgb(234, 235, 240)"} textoBaixo={"em exibição"} corTexto={"black"} />
+        <Cards texto={"Cartazes Ativos"} numero={12} corFundo={"rgba(51, 52, 60, 0.55)"} corTexto={"white"} />
+        <Cards texto={"Hoje"} numero={8} corFundo={"rgba(51, 52, 60, 0.27)"} textoBaixo={"em exibição"} corTexto={"white"} />
+        <Cards texto={"Hoje"} numero={8} corFundo={"rgba(51, 52, 60, 0.08)"} textoBaixo={"em exibição"} corTexto={"black"} />
       </div>
       <Bot texto={"Novo Cartaz"} corFundo={"red"} />
 
