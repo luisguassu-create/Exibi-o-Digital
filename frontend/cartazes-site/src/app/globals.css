@@ -1,0 +1,314 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+html, body {
+  height: 100%;
+}
+
+body:has(.side-bar) {
+  min-height: 150%;
+  display: grid !important;
+  grid-template-columns: 25% 1fr;
+  grid-template-rows: auto 1fr;
+  grid-template-areas:
+    "header header"
+    "sidebar content";
+}
+
+.cabeçalho {
+  grid-area: header;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 32px;
+  background-color: rgb(218, 37, 28);
+  color: white;
+}
+
+.side-bar {
+  grid-area: sidebar;
+  background-color: rgb(51, 52, 60);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 24px 16px;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.side-bar button {
+  width: 100% !important;
+  box-sizing: border-box;
+  text-align: left;
+  white-space: nowrap;
+  
+  background: transparent;
+  border: none;
+  border-left: 3px solid transparent;
+  color: #b3b3b3;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  padding: 14px 20px !important;
+  border-radius: 0 6px 6px 0;
+  cursor: pointer;
+
+  position: relative;
+  overflow: hidden;
+  transition: color 0.25s ease,
+              background-color 0.25s ease,
+              border-left-color 0.25s ease,
+              transform 0.2s ease;
+}
+
+/* leve brilho que desliza ao passar o mouse */
+.side-bar button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.06),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.side-bar button:hover::before {
+  left: 100%;
+}
+
+.side-bar button:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+  border-left-color: #d81e2c; /* mesma cor do header, cria identidade visual */
+  transform: translateX(4px);
+}
+
+.side-bar button:active {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateX(2px) scale(0.98);
+}
+
+.side-bar button:focus-visible {
+  outline: 2px solid #d81e2c;
+  outline-offset: -2px;
+}
+/* Pega o elemento que sobra (o {children}, ou seja, o conteúdo da página)
+   e coloca ele na área "content" do grid */
+body > *:not(.cabeçalho):not(.side-bar) {
+  grid-area: content;
+}
+
+input::placeholder {
+  color: #ffffff;
+  opacity: 1;
+}
+
+.cartooes{
+  display: flex;
+  gap: 20px;
+
+}
+.dash{
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+
+ul{
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 20px;
+}
+
+.windowc{
+  padding: 20px;
+  flex-direction: row;
+  height: 20px;
+}
+.paralelo{
+  display: flex;
+  justify-content: space-between;
+
+}
+
+.secCardCartaz{
+  display: flex;
+  height: 100px;
+  overflow: hidden;
+  transition: height 0.35s ease, box-shadow 0.35s ease;
+  cursor: pointer;
+}
+
+.secCardCartaz:hover{
+  height: 300px;
+  /* box-shadow: 8px 8px 32px 0px rgba(0,0,0,0.65); */
+}
+
+.textohead{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  gap: 20px;
+  text-align: end;
+}
+
+.paragra{
+  opacity: 0;
+  max-height: 0;
+    max-width: 300px;
+  overflow: hidden;
+  transition: opacity 0.4s ease 0.1s, max-height 0.4s ease;
+  padding: 0 20px;
+  color: #333;
+  line-height: 1.5;
+}
+
+.secCardCartaz:hover .paragra{
+  display: flex;
+  text-align: center;
+  opacity: 1;
+  max-height: 200px;
+  max-width: 300px;
+}
+
+a:hover{
+  cursor: pointer;
+}
+.login-wrapper {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background: #222222;
+}
+.login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  background: #fff;
+  padding: 40px 32px;
+  border-radius: 12px;
+  box-shadow: 0px 4px 24px rgba(0, 0, 0, 0.08);
+  width: 100%;
+  max-width: 360px;
+}
+
+.guest-icon {
+  color: #7e3d3d;
+  margin-bottom: 8px;
+  border: 3.5px #7e3d3d solid;
+  border-radius: 50%;
+}
+
+.login label {
+  align-self: flex-start;
+  font-size: 14px;
+  color: #374151;
+  font-weight: 500;
+}
+
+.login input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.login input:focus {
+  border-color: #f63b3b;
+}
+
+.login button {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px;
+  background: #582323;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.login button:hover {
+  background: #200000;
+}
+
+.login a {
+  margin-top: 4px;
+  font-size: 13px;
+  color: #806b6b;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.login a:hover {
+  color: #513737;
+}
+
+
+
+
+.botc:hover{
+  cursor: pointer;
+  background: #582323;
+
+}
+
+.botee{
+    cursor: pointer;
+}
+
+.boteemais{
+  position: fixed;
+  
+}
+.boteemais:hover {
+  filter: brightness(0.9);
+}
+.opcao-botao:hover {
+  background-color: #dcdcdc;
+}
+
+css
+.textohead {
+  display: flex;
+  flex-direction: column; /* isso empilha nome e botão */
+}
+.headThings {
+  display: flex;
+  flex-direction: row;
+
+  justify-content: right;
+  margin-right: 40px;
+  align-content: center;
+  gap: 20px;
+  align-items: center;
+  width: 100%;
+  /* position: relative; */
+}
