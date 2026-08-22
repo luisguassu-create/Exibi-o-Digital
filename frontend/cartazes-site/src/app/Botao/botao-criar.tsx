@@ -27,6 +27,8 @@ export function Bot({ texto, corFundo }: Props) {
             </button>
 
             {aberto && (
+                <>
+                 <div className="overlay" onClick={() => setAberto(false)} />
                 <div
                     style={{
                         position: "fixed",
@@ -46,11 +48,23 @@ export function Bot({ texto, corFundo }: Props) {
                     className="Edicao"
                 >
                     <section>
-                        <button onClick={() => setAberto(false)}>x</button>
-                        <div> </div>
+                         <div style={{
+                            display: "flex",
+                            justifyContent: "space-between"
+                         }}> 
+                       
+                       
                         <h1>Menu de Criação</h1>
+                         <button onClick={() => setAberto(false)} style={{
+                            borderRadius: "10px",
+                            height: "30px",
+                            width: "30px"
+                         }}>x</button>
+                        </div>
                         <hr />
-                        <section style={{ display: "flex", justifyContent: "space-between" }}>
+                        <section style={{ display: "flex", justifyContent: "space-between",
+    padding: "30px"
+                         }}>
                             <div style={{ display: "flex", flexDirection: "column" }}>
                                 <label htmlFor="">Editar Imagem</label>
                                 <input type="file" />
@@ -59,7 +73,9 @@ export function Bot({ texto, corFundo }: Props) {
                                 style={{
                                     display: "flex",
                                     flexDirection: "column",
+                                    justifyContent: "center ",
                                     width: "300px",
+                                    gap: "7px"
                                 }}
                             >
                                 <label htmlFor="">Editar Nome</label>
@@ -72,7 +88,9 @@ export function Bot({ texto, corFundo }: Props) {
                                 <input type="number" />
                                 <label htmlFor="">Duracao (s)</label>
                                 <input type="number" />
-                                <div style={{ display: "flex", gap: "20px" }}>
+                                <div style={{ display: "flex", gap: "20px",
+                                    justifyContent: "end"
+                                 }}>
                                     <button
                                         style={{
                                             width: "100px",
@@ -103,6 +121,8 @@ export function Bot({ texto, corFundo }: Props) {
                         </section>
                     </section>
                 </div>
+                            
+                </>
             )}
         </>
     );

@@ -211,7 +211,7 @@ a:hover{
   align-content: center;
   justify-content: center;
   text-align: center;
-  gap: 10px;
+  gap: 5px;
   background: #fff;
   padding: 40px 32px;
   border-radius: 12px;
@@ -265,7 +265,7 @@ a:hover{
 }
 
 .login button:hover {
-  background: #ab1010;
+  background: #800606;
 }
 
 .login a {
@@ -295,10 +295,14 @@ a:hover{
 
 .boteemais{
   position: fixed;
-  
+
+}
+.boteemais:focus{
+  background-color: #940909;
 }
 .boteemais:hover {
   filter: brightness(0.9);
+  background-color: #6e0202;
 }
 .opcao-botao:hover {
   background-color: #dcdcdc;
@@ -331,8 +335,8 @@ css
   width: 100%;
   height: 45px;
   background: transparent;
-  border: none;
-  border-bottom: 1px solid #000;
+  /* border: none; */
+  /* border-bottom: 1px solid #000; */
   outline: none;
   font-size: 16px;
   color: #000;
@@ -348,9 +352,9 @@ css
   top: 50%;
   transform: translateY(-50%);
   text-align: center;
-  font-size: 10px;
+  font-size: 8px;
   color: #000;
-  opacity: 0.4;
+  opacity: 0.7;
   pointer-events: none;
   transition: all 0.3s ease;
 }
@@ -361,11 +365,167 @@ css
   top: 0;
   transform: translateY(-100%);
   opacity: 1;
-  font-size: 12px;
+  font-size: 10.5px;
   color: #000;
 }
 
 /* Borda vermelha no focus */
 .animacaixa input:focus {
-  border-bottom: 1px solid red;
+  border: 1px solid rgb(36, 0, 0);
+}
+/* ==========================================================
+   Overlay escuro atrás do painel (opcional, dá foco ao modal)
+   ========================================================== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px); /* Safari */
+  z-index: 9;
+  animation: fadeIn 0.18s ease-out;
+}
+
+/* ==========================================================
+   Painel "Menu de Criação"
+   ========================================================== */
+.Edicao {
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: rgb(40, 40, 45);
+  animation: fadeIn 0.18s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Botão "x" de fechar */
+.Edicao > section > button:first-of-type {
+  float: right;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: rgb(120, 120, 130);
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+}
+
+.Edicao > section > button:first-of-type:hover {
+  background: rgb(240, 240, 243);
+  color: rgb(40, 40, 45);
+}
+
+/* Título */
+.Edicao h1 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 4px 0 12px;
+}
+
+.Edicao hr {
+  border: none;
+  border-top: 1px solid rgb(230, 230, 235);
+  margin-bottom: 16px;
+}
+
+/* ==========================================================
+   Área de conteúdo (imagem + formulário)
+   ========================================================== */
+.Edicao section section {
+  gap: 32px;
+}
+
+/* Coluna da imagem */
+.Edicao label {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgb(90, 90, 100);
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+.Edicao label:first-of-type {
+  margin-top: 0;
+}
+
+.Edicao input[type="file"] {
+  border: 1px dashed rgb(200, 200, 210);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 13px;
+  cursor: pointer;
+  background: rgb(250, 250, 252);
+}
+
+/* Inputs de texto, número e data */
+.Edicao input[type="text"],
+.Edicao input[type="number"],
+.Edicao input[type="datetime-local"] {
+  border: 1px solid rgb(220, 220, 228);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
+  margin-bottom: 8px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.Edicao input[type="text"]:focus,
+.Edicao input[type="number"]:focus,
+.Edicao input[type="datetime-local"]:focus {
+  border-color: rgb(51, 52, 60);
+  box-shadow: 0 0 0 3px rgba(51, 52, 60, 0.12);
+}
+
+/* ==========================================================
+   Botões de ação (Salvar / Cancelar)
+   ========================================================== */
+.Edicao button {
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+.Edicao button:hover {
+  filter: brightness(0.95);
+}
+
+.Edicao button:active {
+  transform: scale(0.97);
+}
+
+/* ==========================================================
+   Responsivo
+   ========================================================== */
+@media (max-width: 900px) {
+  .Edicao {
+    right: 16px !important;
+    left: 16px;
+    min-width: unset !important;
+    width: auto;
+  }
+
+  .Edicao section[style] {
+    flex-direction: column !important;
+  }
+}
+
+.login h1{
+  font-family: Arial, Helvetica, sans-serif;
+  
+}
+
+.textcima{
+  margin-top: 20px;
 }

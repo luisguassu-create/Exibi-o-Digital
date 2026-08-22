@@ -21,12 +21,12 @@ export function Botemais({ corFundo, opcoes }: Props) {
                 style={{
                     position: "absolute",
                     bottom: "-17px",
-                    background: corFundo,
-                    color: "black",
+                    background:  "rgb(158, 12, 5)",
+                    color: "white",
                     border: "none",
-                    borderRadius: "50%",
-                    width: "32px",
-                    height: "32px",
+                    borderRadius: "10px",
+                    width: "45px",
+                    height: "30px",
                     minWidth: "32px",
                     flexShrink: 0,
                     fontSize: "18px",
@@ -36,7 +36,7 @@ export function Botemais({ corFundo, opcoes }: Props) {
                 }}
                 className="boteemais"
             >
-                {aberto ? "×" : "+"}
+                {aberto ? "×" : "▼"}
             </button>
 
             {aberto && (

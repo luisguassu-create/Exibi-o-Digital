@@ -60,7 +60,14 @@ export default function Home() {
         className="login"
         style={{ position: "relative", zIndex: 2 }}
       >
-        <Image src={SenaiImg} alt={""} width={105} height={30} />
+      <div className="textcima">
+    <h1 style={{ fontSize: "20px" }}>
+        Faça o seu{" "} <br />
+        <span style={{ fontSize: "30px", color: "red" }}>Login</span>
+    </h1>
+    <br />
+</div>
+        {/* <Image src={SenaiImg} alt={""} width={105} height={30} /> */}
    {/* <h2 style={{ */}
     {/* // fontSize:"7px", */}
   {/* //  }}> */}
@@ -75,8 +82,8 @@ export default function Home() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           style={{
-            borderBottom: "1px solid black",
-             border: "1px solid black",
+            // borderBottom: "1px solid black",
+            //  border: "1px solid black",
             borderRadius: "10px",
             height: "30px"
           }}
@@ -95,7 +102,7 @@ export default function Home() {
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
            style={{
-            border: "1px solid black",
+          
             borderRadius: "10px",
             height: "30px"
           }}
