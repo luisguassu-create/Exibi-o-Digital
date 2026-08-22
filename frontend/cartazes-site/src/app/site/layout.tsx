@@ -8,13 +8,7 @@ import { Botemais } from '../Botao/botao-mais';
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
 
-  function handleLogout() {
-  const confirmar = window.confirm("Deseja realmente sair?");
-  if (confirmar) {
-    router.push("/");
-  }
-}
-
+ 
 return (
   <>
     <header className="cabeçalho">
@@ -23,11 +17,7 @@ return (
         <h2>Nome</h2>
         <Botemais
           corFundo="#e0e0e0"
-          opcoes={[
-            { label: "Sair", onClick: handleLogout },
-            { label: "Modo de Vizualização", onClick: () => console.log("mudou modo") },
-          ]}
-        />
+          opcao1={'Sair'} opcao2={'NaoSei'}        />
       </div>
     </header>
   

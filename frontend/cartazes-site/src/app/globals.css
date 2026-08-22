@@ -529,3 +529,20 @@ css
 .textcima{
   margin-top: 20px;
 }
+
+.doisbutt{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  gap: 20px;
+}
+
+.aa{
+  background-color: #f00606;
+  color: white;
+}
+.aa, .ab{
+  padding: 10px;
+  border-radius: 5px;
+}

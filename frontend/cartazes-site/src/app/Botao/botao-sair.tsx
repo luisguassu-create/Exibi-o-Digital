@@ -5,6 +5,7 @@ type Props = {
 }
 
 export function BotS({texto, corFundo}: Props){
+    
     return(
         <button
         style={{
