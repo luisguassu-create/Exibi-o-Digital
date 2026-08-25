@@ -11,3 +11,15 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+model Cartaz {
+  id             Int      @id @default(autoincrement())
+  titulo         String
+  imagem         String
+  horarioInicio  String
+  horarioFim     String
+  duracao        Int
+  ordem          Int
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
