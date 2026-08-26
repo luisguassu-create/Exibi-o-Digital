@@ -20,7 +20,7 @@ export default function Home() {
       const tl = gsap.timeline();
 
       tl.from(".login", { opacity: 0, y: 40, duration: 0.8, ease: "power3.out" })
-        .from(".textcima", { opacity: 0, scale: 0.8, duration: 0.6 }, "-=0.4")
+        .from(".textcima", { opacity: 0, scale: 0.8, duration: 0.6 }, "-=0.3")
         .from(".animacaixa", { opacity: 0, x: -20, stagger: 0.15, duration: 0.5 }, "-=0.3");
 
       const inputs = containerRef.current?.querySelectorAll<HTMLInputElement>("input");
@@ -113,9 +113,9 @@ export default function Home() {
       {/* Conteúdo por cima do background */}
       <div className="login" style={{ position: "relative", zIndex: 2 }}>
         <div className="textcima">
-          <h1 style={{ fontSize: "20px" }}>
+          <h1 style={{ fontSize: "30px" }}>
             Faça o seu <br />
-            <span style={{ fontSize: "30px", color: "red" }}>Login</span>
+            <span style={{ fontSize: "35px", color: "red" }}>Login</span>
           </h1>
           <br />
         </div>

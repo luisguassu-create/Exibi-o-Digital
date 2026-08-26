@@ -26,6 +26,7 @@ export function Botemais({ corFundo, opcao1, opcao2 }: Props) {
 }
 
     return (
+        
         <div style={{ position: "relative" }}>
             <button
                 onClick={() => setAberto(!aberto)}
