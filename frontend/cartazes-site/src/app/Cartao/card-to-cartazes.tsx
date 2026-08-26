@@ -21,7 +21,7 @@ export function CardCartaz({texto, numero, corFundo, textoBaixo}: Props){
             borderRadius: "20px",
             width: "100%",
             height: "350px",
-            background: " rgb(229, 229, 231)",
+            background: " rgb(195, 195, 201)",
             gap: "180px",
             // boxShadow: "8px 8px 28px 0px rgba(0,0,0,0.51)"
         }}
@@ -34,7 +34,7 @@ export function CardCartaz({texto, numero, corFundo, textoBaixo}: Props){
             borderRadius: "30px",
             padding: "20px"
         }}/>
-        <div style={{display: "flex", flexDirection: "column"}}>
+        <div style={{display: "flex", flexDirection: "column", width: "200px", }}>
 
         <h1 style={{ color: "black", padding:"10px"}}>{texto}</h1>
         <h2 style={{ color: "black",padding:"10px"}}>{textoBaixo}</h2>

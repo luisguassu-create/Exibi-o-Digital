@@ -32,7 +32,7 @@ return (
         <button type="button" onClick={() => router.push('/site/telas/programacao')} className="side-bar-btn">
           Programação
         </button>
-        <button type="button" onClick={() => router.push('/site/telas/preview')} className="side-bar-btn">
+        <button type="button" onClick={() => router.push('/site/telas/carrosel')} className="side-bar-btn">
           Pré-Visualização
         </button>
       </div>

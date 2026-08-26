@@ -546,3 +546,16 @@ css
   padding: 10px;
   border-radius: 5px;
 }
+
+
+
+@view-transition{
+  navigation: auto;
+}
+
+
+
+
+
+
+
