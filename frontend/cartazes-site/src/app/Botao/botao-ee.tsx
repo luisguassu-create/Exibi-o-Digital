@@ -19,7 +19,7 @@ export function Bote({ texto, corFundo }: Props) {
                     borderRadius: "10px",
                     width: "80px",
                     padding: "10px",
-                    boxShadow: " 8px 8px 28px 0px rgba(0,0,0,0.28)"
+                    boxShadow: " 8px 8px 28px 0px rgba(0,0,0,0.1)"
                 }}
                 className="botee"
             >

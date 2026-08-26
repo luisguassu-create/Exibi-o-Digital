@@ -8,13 +8,15 @@ import AlunosImg from "../../public/assets/images/senai-alunos.jpg";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 
+type AlertaTipo = "warning" | "danger" | null;
+
 export default function Home() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [alerta, setAlerta] = useState<AlertaTipo>(null);
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Hook oficial do GSAP para React - lida com Strict Mode e limpa animações automaticamente
   useGSAP(
     () => {
       const tl = gsap.timeline();
@@ -67,13 +69,37 @@ export default function Home() {
   }
 
   function entrar() {
+    // Campos vazios -> aviso (warning)
+    if (!email || !senha) {
+      setAlerta("warning");
+      shakeError(containerRef.current?.querySelector<HTMLElement>(".login") || null);
+      return;
+    }
+
+    // Credenciais erradas -> erro (danger)
     if (email === "admin@gmail.com" && senha === "12345") {
+      setAlerta(null);
       router.push("../site/telas/dashboard");
     } else {
+      setAlerta("danger");
       shakeError(containerRef.current?.querySelector<HTMLElement>(".login") || null);
-      alert("Email ou senha incorretos!");
     }
   }
+
+  const alertaConfig = {
+    warning: {
+      titulo: "Atenção",
+      mensagem: "Preencha o email e a senha para continuar.",
+      cor: "#b45309",
+      fundo: "#fffbeb",
+    },
+    danger: {
+      titulo: "Erro",
+      mensagem: "Email ou senha incorretos.",
+      cor: "#dc2626",
+      fundo: "#fef2f2",
+    },
+  };
 
   return (
     <div
@@ -119,6 +145,27 @@ export default function Home() {
           </h1>
           <br />
         </div>
+
+        {/* Alerta */}
+        {alerta && (
+          <div
+            role="alert"
+            style={{
+              padding: "12px 16px",
+              fontSize: "14px",
+              color: alertaConfig[alerta].cor,
+              background: alertaConfig[alerta].fundo,
+              borderRadius: "10px",
+              fontWeight: 400,
+              marginBottom: "12px",
+            }}
+          >
+            <span style={{ fontWeight: 600, marginRight: "8px" }}>
+              {alertaConfig[alerta].titulo}
+            </span>
+            {alertaConfig[alerta].mensagem}
+          </div>
+        )}
 
         <div className="animacaixa">
           <input

@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   experimental: {
-    urlImports: ['https://framerusercontent.com/'],
+    urlImports: true,
   },
   reactCompiler: true,
   images: {
