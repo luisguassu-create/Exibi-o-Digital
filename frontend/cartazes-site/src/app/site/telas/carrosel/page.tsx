@@ -1,11 +1,23 @@
-import ReelCarouselWrapper from "@/components/ReelCarouselWrapper";
+// src/app/site/telas/carrosel/page.tsx
+import ReelCarousel from "@/components/ReelCarousel";
 
 export default function ReelsPage() {
   return (
-    <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6">
-      <h1 className="text-3xl font-bold mb-6">Carrossel de Reels</h1>
-      <div className="w-full max-w-4xl h-[600px]">
-        <ReelCarouselWrapper />
+    <main
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#000",
+        color: "#fff",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 24,
+      }}
+    >
+     
+      <div style={{ width: "100%", maxWidth: 900, height: 600 }}>
+        <ReelCarousel />
       </div>
     </main>
   );
