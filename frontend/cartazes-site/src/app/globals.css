@@ -95,12 +95,10 @@ body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.06),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.06),
+      transparent);
   transition: left 0.5s ease;
 }
 
@@ -124,9 +122,10 @@ body {
   outline: 2px solid #d81e2c;
   outline-offset: -2px;
 }
+
 /* Pega o elemento que sobra (o {children}, ou seja, o conteúdo da página)
    e coloca ele na área "content" do grid */
-body > *:not(.cabeçalho):not(.side-bar) {
+body>*:not(.cabeçalho):not(.side-bar) {
   grid-area: content;
 }
 
@@ -140,6 +139,7 @@ input::placeholder {
 
   gap: 20px;
 }
+
 .dash {
   display: flex;
   flex-direction: column;
@@ -159,6 +159,7 @@ ul {
   flex-direction: row;
   height: 20px;
 }
+
 .paralelo {
   display: flex;
   justify-content: space-between;
@@ -216,6 +217,7 @@ ul {
 a:hover {
   cursor: pointer;
 }
+
 .login-wrapper {
   width: 100vw;
   height: 100vh;
@@ -225,6 +227,7 @@ a:hover {
   text-align: center;
   background: #222222;
 }
+
 .login {
   display: flex;
   flex-direction: column;
@@ -312,21 +315,26 @@ a:hover {
 .boteemais {
   position: fixed;
 }
+
 .boteemais:focus {
   background-color: #940909;
 }
+
 .boteemais:hover {
   filter: brightness(0.9);
   background-color: #6e0202;
 }
+
 .opcao-botao:hover {
   background-color: #dcdcdc;
 }
 
 .textohead {
   display: flex;
-  flex-direction: column; /* isso empilha nome e botão */
+  flex-direction: column;
+  /* isso empilha nome e botão */
 }
+
 .headThings {
   display: flex;
   flex-direction: row;
@@ -339,6 +347,7 @@ a:hover {
   width: 100%;
   /* position: relative; */
 }
+
 .animacaixa {
   position: relative;
   width: 200px;
@@ -374,8 +383,8 @@ a:hover {
 }
 
 /* Quando o input está focado OU já tem texto digitado */
-.animacaixa input:focus ~ label,
-.animacaixa input:not(:placeholder-shown) ~ label {
+.animacaixa input:focus~label,
+.animacaixa input:not(:placeholder-shown)~label {
   top: 0;
   transform: translateY(-100%);
   opacity: 1;
@@ -387,6 +396,7 @@ a:hover {
 .animacaixa input:focus {
   border: 1px solid rgb(36, 0, 0);
 }
+
 /* ==========================================================
    Overlay escuro atrás do painel (opcional, dá foco ao modal)
    ========================================================== */
@@ -395,7 +405,8 @@ a:hover {
   inset: 0;
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px); /* Safari */
+  -webkit-backdrop-filter: blur(6px);
+  /* Safari */
   z-index: 9;
   animation: fadeIn 0.18s ease-out;
 }
@@ -414,6 +425,7 @@ a:hover {
     opacity: 0;
     transform: translateY(-6px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -421,7 +433,7 @@ a:hover {
 }
 
 /* Botão "x" de fechar */
-.Edicao > section > button:first-of-type {
+.Edicao>section>button:first-of-type {
   float: right;
   background: transparent;
   border: none;
@@ -434,7 +446,7 @@ a:hover {
   transition: background-color 0.15s ease;
 }
 
-.Edicao > section > button:first-of-type:hover {
+.Edicao>section>button:first-of-type:hover {
   background: rgb(240, 240, 243);
   color: rgb(40, 40, 45);
 }
@@ -559,6 +571,7 @@ a:hover {
   background-color: #f00606;
   color: white;
 }
+
 .aa,
 .ab {
   padding: 10px;
@@ -588,11 +601,9 @@ a:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(
-    circle at var(--mouse-x) var(--mouse-y),
-    var(--spotlight-color),
-    transparent 80%
-  );
+  background: radial-gradient(circle at var(--mouse-x) var(--mouse-y),
+      var(--spotlight-color),
+      transparent 80%);
   opacity: 0;
   transition: opacity 0.5s ease;
   pointer-events: none;
@@ -602,6 +613,7 @@ a:hover {
 .card-spotlight:focus-within::before {
   opacity: 0.6;
 }
+
 /* 
 @theme inline {
   --font-heading: var(--font-sans);
@@ -747,3 +759,14 @@ a:hover {
 } */
 
 
+.textocomborda {
+  font-size: 40px;
+  color: white;
+
+}
+
+
+
+.hoverChoose:hover {
+  background-color: rgb(25, 25, 37);
+}

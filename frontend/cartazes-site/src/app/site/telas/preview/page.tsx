@@ -1,24 +1,10 @@
 // src/app/site/telas/carrosel/page.tsx
 import ReelCarousel from "@/components/ReelCarousel";
+import TelaCarrosel from "../carrosel/page";
+
 
 export default function ReelsPage() {
   return (
-    <main
-      style={{
-        minHeight: "100vh",
-        backgroundColor: "#000",
-        color: "#fff",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 24,
-      }}
-    >
-     
-      <div style={{ width: "100%", maxWidth: 900, height: 600 }}>
-        <ReelCarousel />
-      </div>
-    </main>
+    TelaCarrosel
   );
 }

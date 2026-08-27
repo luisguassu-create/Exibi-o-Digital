@@ -1,7 +1,7 @@
 // src/app/site/telas/carrosel/page.tsx
 import ReelCarousel from "@/components/ReelCarousel";
 
-export default function ReelsPage() {
+export default function TelaCarrosel() {
   return (
     <main
       style={{

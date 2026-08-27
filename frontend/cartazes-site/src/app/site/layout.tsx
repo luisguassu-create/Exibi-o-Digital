@@ -31,7 +31,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
                     <Botemais
                         corFundo="#e0e0e0"
                         opcao1={'Sair'}
-                        opcao2={'NaoSei'}
+                        opcao2={'Vizualização'}
                     />
                 </div>
             </header>
@@ -63,7 +63,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
                     onClick={() => router.push('/site/telas/carrosel')}
                     className="side-bar-btn"
                 >
-                    Pré-Visualização
+                    Modificar Layout
                 </button>
             </nav>
 

@@ -1,32 +1,20 @@
 "use client";
+
+import Modal from "@/components/modal-mais-opcoes";
 import { useRouter } from "next/navigation";
-import router from "next/router";
 import { useState } from "react";
 
-type Opcao = {
-    label: string,
-    onClick: () => void,
-}
-
 type Props = {
-    corFundo: string,
-    opcao1: string,
-    opcao2: string,
+    corFundo: string;
+    opcao1: string;
+    opcao2: string;
 }
-
-
 
 export function Botemais({ corFundo, opcao1, opcao2 }: Props) {
     const [aberto, setAberto] = useState(false);
-    const [sairAberto, setSairAberto] = useState(false);
-    const router = useRouter()
-
-    function handleLogout() {
-  router.push("/");
-}
+    const router = useRouter();
 
     return (
-        
         <div style={{ position: "relative" }}>
             <button
                 onClick={() => setAberto(!aberto)}
@@ -50,117 +38,13 @@ export function Botemais({ corFundo, opcao1, opcao2 }: Props) {
             >
                 {aberto ? "×" : "▼"}
             </button>
-
-            {aberto && (
-                <div
-                    style={{
-                        position: "absolute",
-                        top: "40px",
-                        right: "0",
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "6px",
-                        background: "white",
-                        borderRadius: "10px",
-                        padding: "8px",
-                        boxShadow: "8px 8px 28px 0px rgba(0,0,0,0.28)",
-                        zIndex: 10,
-                        minWidth: "160px",
-                    }}
-                >
-                    {/* Botão opcao1 -> "Sair", abre o painel SairAberto */}
-                    <button
-                        onClick={() => {
-                            setSairAberto(true);
-                            setAberto(false);
-                        }}
-                        style={{
-                            background: "#f0f0f0",
-                            color: "black",
-                            border: "none",
-                            borderRadius: "6px",
-                            padding: "8px 16px",
-                            cursor: "pointer",
-                            whiteSpace: "nowrap",
-                            textAlign: "left",
-                        }}
-                        className="opcao-botao"
-                    >
-                        {opcao1}
-                    </button>
-
-                    {/* Botão opcao2 */}
-                    <button
-                        onClick={() => {
-                            console.log("clicou em", opcao2);
-                            setAberto(false);
-                        }}
-                        style={{
-                            background: "#f0f0f0",
-                            color: "black",
-                            border: "none",
-                            borderRadius: "6px",
-                            padding: "8px 16px",
-                            cursor: "pointer",
-                            whiteSpace: "nowrap",
-                            textAlign: "left",
-                        }}
-                        className="opcao-botao"
-                    >
-                        {opcao2}
-                    </button>
-
-                 
-                </div>
-            )}
-
-            {sairAberto && (
-                <>
-                    <div className="overlay" onClick={() => setSairAberto(false)} />
-                    <div
-                        style={{
-                            position: "fixed",
-                            top: "275px",
-                            right: "450px",
-                            display: "flex",
-                            flexDirection: "column",
-                            gap: "6px",
-                            background: "white",
-                            borderRadius: "10px",
-                            padding: "8px",
-                            boxShadow: "8px 8px 28px 0px rgba(0,0,0,0.28)",
-                            zIndex: 20,
-                            minWidth: "300px",
-                            minHeight: "150px",
-                        }}
-                        className="Edicao"
-                    >
-                        <section style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            alignContent: "center",
-                        }}>
-                            <h1>Você realmente deseja sair</h1>
-                            <div
-                                style={{
-                                    display: "flex",
-                                    gap: "10px",
-                                }}
-                                
-                                className="doisbutt">
-                               <button className="aa" onClick={() => handleLogout()}>Sim</button>
-                                <button className="ab" onClick={() => {
-                            
-                                setSairAberto(false);
-                            }}>Não</button>
-                            </div>
-                        </section>
-
-                    </div>
-                </>
-            )}
+            
+            <Modal 
+                isOpen={aberto} 
+                onClose={() => setAberto(false)} 
+                opcao1={opcao1}
+                opcao2={opcao2}
+            />
         </div>
     );
 }
