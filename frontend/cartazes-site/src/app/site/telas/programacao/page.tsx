@@ -13,7 +13,13 @@ export default function Cartzes() {
              gap: "50px"
             }}>
             <div className="paralelo">
-            <h1>Programação</h1>
+            <h1
+            style={{
+          color: " black",
+          fontWeight: "bold",
+          fontSize: "30px",
+        }}
+            >Programação</h1>
            
             </div>
             <hr />

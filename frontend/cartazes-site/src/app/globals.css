@@ -2,8 +2,6 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-
-
 * {
   margin: 0;
   padding: 0;
@@ -11,13 +9,18 @@
   /* font-family: Arial, Helvetica, sans-serif; */
 }
 
-html, body {
+html,
+body {
   height: 100%;
 }
 
-body:has(.side-bar) {
-  min-height: 150%;
-  display: grid !important;
+/* ANTES: dependia de `body:has(.side-bar)` e `body > *`.
+   Trocado para `.app-shell`, que agora é o pai DIRETO de
+   .cabeçalho, .side-bar e .app-content. */
+
+.app-shell {
+  min-height: 100vh;
+  display: grid;
   grid-template-columns: 25% 1fr;
   grid-template-rows: auto 1fr;
   grid-template-areas:
@@ -48,6 +51,17 @@ body:has(.side-bar) {
   overflow: hidden;
 }
 
+.app-content {
+  grid-area: content;
+}
+
+.dash {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}
+
 .side-bar button {
   width: 100% !important;
   box-sizing: border-box;
@@ -67,13 +81,13 @@ body:has(.side-bar) {
 
   position: relative;
   overflow: hidden;
-  transition: color 0.25s ease,
-              background-color 0.25s ease,
-              border-left-color 0.25s ease,
-              transform 0.2s ease;
+  transition:
+    color 0.25s ease,
+    background-color 0.25s ease,
+    border-left-color 0.25s ease,
+    transform 0.2s ease;
 }
 
-/* leve brilho que desliza ao passar o mouse */
 .side-bar button::before {
   content: "";
   position: absolute;
@@ -97,7 +111,7 @@ body:has(.side-bar) {
 .side-bar button:hover {
   background-color: rgba(255, 255, 255, 0.06);
   color: #ffffff;
-  border-left-color: #d81e2c; /* mesma cor do header, cria identidade visual */
+  border-left-color: #d81e2c;
   transform: translateX(4px);
 }
 
@@ -121,51 +135,51 @@ input::placeholder {
   opacity: 1;
 }
 
-.cartooes{
+.cartooes {
   display: flex;
 
   gap: 20px;
-
 }
-.dash{
+.dash {
   display: flex;
   flex-direction: column;
   gap: 20px;
   padding: 20px;
 }
 
-ul{
+ul {
   display: flex;
   flex-direction: column;
   padding: 20px;
   gap: 20px;
 }
 
-.windowc{
+.windowc {
   padding: 20px;
   flex-direction: row;
   height: 20px;
 }
-.paralelo{
+.paralelo {
   display: flex;
   justify-content: space-between;
-
 }
 
-.secCardCartaz{
+.secCardCartaz {
   display: flex;
   height: 100px;
   overflow: hidden;
-  transition: height 0.35s ease, box-shadow 0.35s ease;
+  transition:
+    height 0.35s ease,
+    box-shadow 0.35s ease;
   cursor: pointer;
 }
 
-.secCardCartaz:hover{
+.secCardCartaz:hover {
   height: 300px;
   /* box-shadow: 8px 8px 32px 0px rgba(0,0,0,0.65); */
 }
 
-.textohead{
+.textohead {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -174,21 +188,23 @@ ul{
   text-align: end;
 }
 
-.paragra{
+.paragra {
   display: flex;
   text-align: center;
   justify-content: center;
   opacity: 0;
   max-height: 0;
-    max-width: 300px;
+  max-width: 300px;
   overflow: hidden;
-  transition: opacity 0.4s ease 0.1s, max-height 0.4s ease;
+  transition:
+    opacity 0.4s ease 0.1s,
+    max-height 0.4s ease;
   padding: 0 20px;
   color: #333;
   line-height: 1.5;
 }
 
-.secCardCartaz:hover .paragra{
+.secCardCartaz:hover .paragra {
   display: flex;
   text-align: center;
   justify-content: center;
@@ -197,11 +213,10 @@ ul{
   max-width: 300px;
 }
 
-a:hover{
+a:hover {
   cursor: pointer;
 }
 .login-wrapper {
-
   width: 100vw;
   height: 100vh;
   display: flex;
@@ -285,21 +300,19 @@ a:hover{
   color: #513737;
 }
 
-.botc:hover{
+.botc:hover {
   cursor: pointer;
   background: #582323;
-
 }
 
-.botee{
-    cursor: pointer;
+.botee {
+  cursor: pointer;
 }
 
-.boteemais{
+.boteemais {
   position: fixed;
-
 }
-.boteemais:focus{
+.boteemais:focus {
   background-color: #940909;
 }
 .boteemais:hover {
@@ -309,7 +322,6 @@ a:hover{
 .opcao-botao:hover {
   background-color: #dcdcdc;
 }
-
 
 .textohead {
   display: flex;
@@ -479,7 +491,9 @@ a:hover{
   font-size: 14px;
   margin-bottom: 8px;
   outline: none;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .Edicao input[type="text"]:focus,
@@ -496,7 +510,9 @@ a:hover{
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: filter 0.15s ease, transform 0.1s ease;
+  transition:
+    filter 0.15s ease,
+    transform 0.1s ease;
 }
 
 .Edicao button:hover {
@@ -523,16 +539,15 @@ a:hover{
   }
 }
 
-.login h1{
+.login h1 {
   font-family: Arial, Helvetica, sans-serif;
-
 }
 
-.textcima{
+.textcima {
   margin-top: 20px;
 }
 
-.doisbutt{
+.doisbutt {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -540,16 +555,17 @@ a:hover{
   gap: 20px;
 }
 
-.aa{
+.aa {
   background-color: #f00606;
   color: white;
 }
-.aa, .ab{
+.aa,
+.ab {
   padding: 10px;
   border-radius: 5px;
 }
 
-@view-transition{
+@view-transition {
   navigation: auto;
 }
 
@@ -566,13 +582,17 @@ a:hover{
 }
 
 .card-spotlight::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at var(--mouse-x) var(--mouse-y), var(--spotlight-color), transparent 80%);
+  background: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    var(--spotlight-color),
+    transparent 80%
+  );
   opacity: 0;
   transition: opacity 0.5s ease;
   pointer-events: none;
@@ -706,3 +726,24 @@ a:hover{
     @apply font-sans;
   }
 } */
+
+/* .ListaAnimation {
+  animation: listaSurgindo 0.9s ease;
+  animation-timeline: view();
+  animation-range: entry 20% cover 100%;
+}
+
+
+
+@keyframes listaSurgindo {
+  from {
+    opacity: 0;
+    transform: opacity(0.2) translateY(0px);
+  }
+  to {
+    opacity: 1;
+    transform: opacity(1) translateY(20);
+  }
+} */
+
+

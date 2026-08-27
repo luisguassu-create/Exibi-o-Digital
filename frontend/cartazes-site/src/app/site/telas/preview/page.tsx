@@ -1,31 +1,24 @@
-import { CardCartaz } from "@/app/Cartao/card-to-cartazes";
-import { Bot } from "@/app/Botao/botao-criar";
-import { Bote } from "@/app/Botao/botao-ee";
-import { CardProg } from "@/app/Cartao/card-to-prog";
-import { Tela } from "@/app/Cartao/card-view";
-import Image from 'next/image'
-import patoImg from '../../../../../public/assets/images/pato.jpg' 
+// src/app/site/telas/carrosel/page.tsx
+import ReelCarousel from "@/components/ReelCarousel";
 
-
-export default function Cartzes() {
-    return (
-
-        <div
-         style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                width: "100%",
-                height: "100%",
-            }} >
-            <Image src={patoImg} alt={""}
-                style={{
-                   borderRadius: "50px",
-                    width: "90%",
-                    height: "90%",
-                    background: "rgb(255, 236, 202)",
-            }}></Image>
-           
-    </div>
-    );
+export default function ReelsPage() {
+  return (
+    <main
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#000",
+        color: "#fff",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 24,
+      }}
+    >
+     
+      <div style={{ width: "100%", maxWidth: 900, height: 600 }}>
+        <ReelCarousel />
+      </div>
+    </main>
+  );
 }
