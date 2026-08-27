@@ -3,6 +3,8 @@
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import ModalConfirmacao from "./modal-confirmacao";
+import ModalConfirmacaoV from "./modal-confirmacaoVisual";
+
 
 type ModalProps = {
     isOpen: boolean;
@@ -14,10 +16,15 @@ type ModalProps = {
 
 export default function Modal({ isOpen, onClose, opcao1, opcao2, onOpcao2Click }: ModalProps) {
     const [sairAberto, setSairAberto] = useState(false);
+    const [visualAberto, setVisualAberto] = useState(false);
     const router = useRouter();
 
     function handleLogout() {
         router.push("/");
+    }
+
+     function Visualizar() {
+        router.push('/site/telas/carrosel');
     }
 
     if (!isOpen) return null;
@@ -62,9 +69,7 @@ export default function Modal({ isOpen, onClose, opcao1, opcao2, onOpcao2Click }
 
                 <button
                     onClick={() => {
-                        console.log("clicou em", opcao2);
-                        if (onOpcao2Click) onOpcao2Click();
-                        onClose();
+                       setVisualAberto(true)
                     }}
                     style={{
                         background: "#f0f0f0",
@@ -88,6 +93,10 @@ export default function Modal({ isOpen, onClose, opcao1, opcao2, onOpcao2Click }
                         <ModalConfirmacao
                             isOpen={sairAberto}
                             onClose={() => setSairAberto(false)}
+                        />
+                        <ModalConfirmacaoV
+                            isOpen={visualAberto}
+                            onClose={() => setVisualAberto(false)}
                         />
                
                 </>

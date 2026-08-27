@@ -12,7 +12,7 @@ type ModalConfirmacaoProps = {
     onClose: () => void;
 };
 
-export default function ModalConfirmacao({
+export default function ModalConfirmacaoV({
     isOpen,
     onClose,
 }: ModalConfirmacaoProps) {
@@ -31,8 +31,8 @@ export default function ModalConfirmacao({
         }
     }, [isOpen]);
 
-    function handleLogout() {
-        router.push("/");
+    function Visualizar() {
+        router.push('@/components/tela-carrosel-full-screen');
     }
 
     const { contextSafe } = useGSAP(
@@ -220,7 +220,7 @@ export default function ModalConfirmacao({
                             color: "#1a1a1a",
                         }}
                     >
-                        Você realmente deseja sair?
+                        Você deseja ir para vizualização?
                     </h2>
 
                     <div
@@ -231,7 +231,7 @@ export default function ModalConfirmacao({
                         }}
                         className="doisbutt"
                     >
-                        <button className="aa" onClick={handleLogout}>
+                        <button className="aa" onClick={Visualizar}>
                             Sim
                         </button>
 

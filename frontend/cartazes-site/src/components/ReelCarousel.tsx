@@ -81,8 +81,8 @@ export default function ReelCarousel({
   const styles: Record<string, CSSProperties> = {
     container: {
       position: "relative",
-      width: "100%",
-      height: "100%",
+      width: "50%",
+      height: "50%",
       overflow: "hidden",
       borderRadius: 12,
     },

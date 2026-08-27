@@ -1,10 +1,12 @@
 // src/app/site/telas/carrosel/page.tsx
 import ReelCarousel from "@/components/ReelCarousel";
-import TelaCarrosel from "../carrosel/page";
+import TelaCarroselComRespeito from "@/components/tela-carrosel";
 
 
 export default function ReelsPage() {
   return (
-    TelaCarrosel
+    <div style={{scale:"100px"}}>
+    <TelaCarroselComRespeito corFundo={"black"}/>
+    </div>
   );
 }
