@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import {
   listarCartazes,
-  buscarCartazPorId,
+  buscarCartaz,
   criarCartaz,
   atualizarCartaz,
   deletarCartaz
@@ -12,7 +12,7 @@ const router = Router();
 
 router.get("/", listarCartazes);
 
-router.get("/:id", buscarCartazPorId);
+router.get("/:id", buscarCartaz);
 
 router.post("/", criarCartaz);
 
