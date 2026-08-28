@@ -1,0 +1,177 @@
+.container {
+  display: flex;
+  overflow: hidden;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  align-content: center;
+  margin: 20px;
+}
+
+/* Estilo "de repouso" do bloco principal. É proposital que width/height/
+   backgroundColor/borderRadius fiquem aqui e NÃO em style inline do React:
+   o GSAP escreve top/left/width/height/position/zIndex diretamente no
+   elemento durante a expansão, e quando a timeline de saída roda
+   clearProps para remover essas props inline, é ESTA classe que volta
+   a assumir o controle do tamanho/aparência. Se estivesse tudo inline,
+   o elemento ficaria sem width/height nenhum e "sumiria". */
+.telaAnimacao {
+  position: relative; /* faz os widgets soltos dentro dele (position:absolute)
+                          serem posicionados relativos a ele, tanto expandido
+                          quanto colapsado */
+  overflow: hidden; /* evita que um widget solto quando o `el` estava grande
+                        "vaze" pra fora quando ele volta a ficar pequeno */
+  width: 50vw;
+  height: 50vh;
+  background-color: #e0e0e0;
+  border-radius: 12px;
+}
+
+.visualizacaoCard {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+.carrossel {
+  width: 30%;
+  height: 80%;
+  border-radius: 10px;
+  background-color: #b0b0b0;
+}
+
+.botoesWrapper {
+  display: flex;
+  gap: 20px;
+  position: fixed;
+  right: 205px;
+  top: 550px;
+  z-index: 10000;
+}
+
+.botaoEditLay {
+  color: black;
+  border: none;
+  border-radius: 10px;
+  width: 130px;
+  padding: 10px;
+  background-color: #ffffffa8;
+  box-shadow: 8px 8px 28px 0px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.botaoSalvar {
+  width: 110px;
+  height: 36px;
+  color: white;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  transition: background-color 0.3s ease, transform 0.15s ease;
+}
+
+.sideAnimacao {
+  display: flex;
+  justify-content: flex-end;
+  align-self: flex-end;
+  margin-top: -415px;
+  margin-right: -500px;
+  opacity: 0;
+}
+
+.sideCard {
+  position: relative;
+  background: linear-gradient(180deg, rgb(82, 83, 92) 20%, rgb(38, 39, 45) 100%);
+  width: 450px;
+  height: 80vh;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.cardListWrapper {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.baixoWrapper {
+  position: absolute;
+  top: 895px;
+  right: 540px;
+  z-index: 999;
+}
+
+.baixoCard {
+  background: linear-gradient(180deg, rgb(82, 83, 92) 20%, rgb(38, 39, 45) 100%);
+  width: 70vw;
+  height: 7vh;
+  border-radius: 10px;
+}
+@media (max-width: 1042px) {
+  .container {
+    margin: 10px;
+  }
+
+  .telaAnimacao {
+    width: 70vw;
+    height: 45vh;
+  }
+
+  .visualizacaoCard {
+    width: 100%;
+    height: 100%;
+  }
+
+  .carrossel {
+    width: 40%;
+    height: 75%;
+  }
+
+  .botoesWrapper {
+    right: 50px;
+    top: auto;
+    bottom: 30px;
+  }
+
+  .botaoEditLay {
+    width: 120px;
+    padding: 8px;
+  }
+
+  .botaoSalvar {
+    width: 100px;
+    height: 34px;
+  }
+
+  .sideAnimacao {
+    margin-top: 0px;
+    margin-right: 0px;
+  }
+
+  .sideCard {
+    width: 300px;
+    height: 70vh;
+  }
+
+  .cardListWrapper {
+    width: 100%;
+    height: 100%;
+  }
+
+  .baixoWrapper {
+    top: auto;
+    bottom: 80px;
+    right: 50%;
+    transform: translateX(50%);
+  }
+
+  .baixoCard {
+
+    width: 85vw;
+    height: 8vh;
+  }
+}

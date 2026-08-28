@@ -21,6 +21,7 @@ body {
 .app-shell {
   min-height: 100vh;
   display: grid;
+  overflow-x: hidden;
   grid-template-columns: 25% 1fr;
   grid-template-rows: auto 1fr;
   grid-template-areas:
@@ -771,3 +772,22 @@ a:hover {
   background-color: rgb(25, 25, 37);
 }
 
+.VizualizacaoCard{
+  border-radius: 20px;
+ 
+  height: 50vh;
+  width: 50vw;
+}
+
+.CarrosselRep{
+  background-color: rgb(37, 177, 25);
+
+}
+
+.botao-EditLay:hover{
+  cursor: pointer;
+}
+
+.botao-SaveLay:hover{
+  cursor: pointer;
+}

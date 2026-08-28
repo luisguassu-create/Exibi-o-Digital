@@ -1,0 +1,44 @@
+.cardList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+}
+
+.card {
+  width: 200px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  /* background: linear-gradient(180deg, rgb(70, 71, 80) 0%, rgb(48, 49, 56) 100%); */
+  box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.4);
+  cursor: grab;
+  user-select: none;
+  touch-action: none; /* necessário pro Draggable funcionar bem em touch */
+}
+
+.card:active {
+  cursor: grabbing;
+}
+
+.cardLabel {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 6px;
+}
+
+.widgetBody {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.widgetIcon {
+  font-size: 1.4rem;
+}
+
+.widgetValue {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+}

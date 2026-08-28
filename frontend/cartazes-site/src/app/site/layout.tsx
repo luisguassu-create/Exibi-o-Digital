@@ -62,6 +62,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
                     type="button"
                     onClick={() => router.push('/site/telas/carrosel')}
                     className="side-bar-btn"
+                    style={{width:"20px"}}
                 >
                     Modificar Layout
                 </button>
