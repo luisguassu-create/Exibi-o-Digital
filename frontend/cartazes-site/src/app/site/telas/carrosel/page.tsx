@@ -125,7 +125,7 @@ export default function TelaModificacao({
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const saved: SavedLayout = JSON.parse(raw);
-        
+
         if (saved.corFundo) {
           setCorClicada(saved.corFundo);
         }
@@ -274,6 +274,12 @@ export default function TelaModificacao({
           gsap.set(el, { clearProps: "position,top,left,width,height,zIndex" });
         if (carrossel) gsap.set(carrossel, { clearProps: "width,height" });
 
+        // Reseta a sidebar para o estado original
+        if (side) gsap.set(side, { clearProps: "all" });
+
+        // FIX: Garante que o painel inferior fique escondido e sem opacidade ao finalizar
+        if (baixo) gsap.set(baixo, { top: "100%", opacity: 0 });
+
         isAnimatingRef.current = false;
         setIsExpanded(false);
         if (onCompleteCallback) onCompleteCallback();
@@ -305,8 +311,18 @@ export default function TelaModificacao({
       );
     }
 
+    // Anima o painel inferior deslizando para baixo e sumindo com opacidade
     if (baixo) {
-      tl.to(baixo, { top: 1000, duration: 0.6, ease: "expo.inOut" }, "-=0.3");
+      tl.to(
+        baixo,
+        {
+          top: "100%",
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.in",
+        },
+        "-=0.3"
+      );
     }
 
     if (el && targetRect) {
@@ -330,133 +346,148 @@ export default function TelaModificacao({
   };
 
   const handleEditLayout = () => {
-    if (isAnimatingRef.current) return;
-    if (!telaAnimacaoRef.current || !carrosselRef.current) return;
+  if (isAnimatingRef.current) return;
+  if (!telaAnimacaoRef.current || !carrosselRef.current) return;
 
-    if (isExpanded) {
-      animarSaida();
-      return;
-    }
+  if (isExpanded) {
+    animarSaida();
+    return;
+  }
 
-    isAnimatingRef.current = true;
+  isAnimatingRef.current = true;
 
-    const el = telaAnimacaoRef.current;
-    const carrossel = carrosselRef.current;
-    const side = sideAnimacaoRef.current;
-    const b = botao.current;
-    const baixo = baixoRef.current;
+  const el = telaAnimacaoRef.current;
+  const carrossel = carrosselRef.current;
+  const side = sideAnimacaoRef.current;
+  const b = botao.current;
+  const baixo = baixoRef.current;
 
-    if (draggableInstanceRef.current) {
-      draggableInstanceRef.current[0].kill();
-      draggableInstanceRef.current = null;
-    }
+  if (draggableInstanceRef.current) {
+    draggableInstanceRef.current[0].kill();
+    draggableInstanceRef.current = null;
+  }
 
-    killAllTweens();
+  killAllTweens();
 
-    const rect = el.getBoundingClientRect();
-    originalRectRef.current = {
-      top: rect.top,
-      left: rect.left,
-      width: rect.width,
-      height: rect.height,
-    };
-
-    const tl = gsap.timeline({
-      onComplete: () => {
-        isAnimatingRef.current = false;
-      },
-    });
-
-    tl.fromTo(b, { top: 570 }, { top: 860, duration: 0.7, ease: "expo.out" })
-      .fromTo(
-        el,
-        {
-          position: "fixed",
-          top: rect.top,
-          left: rect.left,
-          width: rect.width,
-          height: rect.height,
-          zIndex: 9999,
-        },
-        {
-          top: 100,
-          left: 20,
-          width: "70vw",
-          height: "80vh",
-          duration: 0.9,
-          ease: "expo.out",
-        },
-        "<"
-      )
-      .fromTo(
-        baixo,
-        { top: 1000 },
-        { top: 875, duration: 0.7, ease: "expo.out" },
-        "-=0.7"
-      )
-      .fromTo(
-        carrossel,
-        {
-          width: "30%",
-          height: "80%",
-          borderRadius: "10px",
-          scale: 0.85,
-          opacity: 0.5,
-        },
-        {
-          width: "30%",
-          height: "80%",
-          borderRadius: "10px",
-          scale: carrosselTransform.scale,
-          opacity: 1,
-          duration: 0.6,
-          ease: "back.out(2.2)",
-        },
-        "-=0.5"
-      );
-
-    if (side) {
-      tl.fromTo(
-        side,
-        {
-          marginTop: "0px",
-          marginRight: "-500px",
-          opacity: 0,
-          scaleX: 1.55,
-          scaleY: 0.85,
-          transformOrigin: "right center",
-        },
-        {
-          marginTop: "0px",
-          marginRight: "20px",
-          opacity: 1,
-          scaleX: 1,
-          scaleY: 1,
-          duration: 1.5,
-          ease: "elastic.out(1, 0.5)",
-          onComplete: () => {
-            draggableInstanceRef.current = Draggable.create(carrossel, {
-              bounds: el,
-              edgeResistance: 0.65,
-              type: "x,y",
-              cursor: "grab",
-              activeCursor: "grabbing",
-              onDragEnd() {
-                setCarrosselTransform({
-                  x: this.x,
-                  y: this.y,
-                  scale: (gsap.getProperty(carrossel, "scale") as number) ?? 1,
-                });
-              },
-            });
-          },
-        },
-        ">"
-      );
-    }
-
-    setIsExpanded(true);
+  const rect = el.getBoundingClientRect();
+  originalRectRef.current = {
+    top: rect.top,
+    left: rect.left,
+    width: rect.width,
+    height: rect.height,
   };
+
+  // 1. Reseta o ponto de partida de TODOS os elementos para o estado oculto original
+  if (baixo) gsap.set(baixo, { top: "100%", opacity: 0 });
+  if (side) {
+    gsap.set(side, {
+      marginTop: "0px",
+      marginRight: "-500px",
+      opacity: 0,
+      scaleX: 1.55,
+      scaleY: 0.85,
+      transformOrigin: "right center",
+    });
+  }
+
+  const tl = gsap.timeline({
+    onComplete: () => {
+      isAnimatingRef.current = false;
+    },
+  });
+
+  // 2. Animações sincronizadas da tela, botão e painel inferior
+  tl.fromTo(b, { top: 570 }, { top: 860, duration: 0.7, ease: "expo.out" })
+    .fromTo(
+      el,
+      {
+        position: "fixed",
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+        zIndex: 10,
+      },
+      {
+        top: 100,
+        left: 20,
+        width: "70vw",
+        height: "80vh",
+        duration: 0.9,
+        ease: "expo.out",
+      },
+      "<"
+    )
+    .fromTo(
+      baixo,
+      { top: "100%", opacity: 0 },
+      { top: 875, opacity: 1, duration: 0.7, ease: "expo.out" },
+      "-=0.7"
+    )
+    .fromTo(
+      carrossel,
+      {
+        width: "30%",
+        height: "80%",
+        borderRadius: "10px",
+        scale: 0.85,
+        opacity: 0.5,
+      },
+      {
+        width: "30%",
+        height: "80%",
+        borderRadius: "10px",
+        scale: carrosselTransform.scale,
+        opacity: 1,
+        duration: 0.6,
+        ease: "back.out(2.2)",
+      },
+      "-=0.5"
+    );
+
+  // 3. Animação da Sidebar (Sempre idêntica em todas as execuções)
+  if (side) {
+    tl.fromTo(
+      side,
+      {
+        marginTop: "0px",
+        marginRight: "-500px",
+        opacity: 0,
+        scaleX: 1.55,
+        scaleY: 0.85,
+        transformOrigin: "right center",
+      },
+      {
+        marginTop: "0px",
+        marginRight: "20px",
+        opacity: 1,
+        scaleX: 1,
+        scaleY: 1,
+        duration: 1.2,
+        ease: "elastic.out(1, 0.5)",
+        onComplete: () => {
+          draggableInstanceRef.current = Draggable.create(carrossel, {
+            bounds: el,
+            edgeResistance: 0.65,
+            type: "x,y",
+            cursor: "grab",
+            activeCursor: "grabbing",
+            onDragEnd() {
+              setCarrosselTransform({
+                x: this.x,
+                y: this.y,
+                scale: (gsap.getProperty(carrossel, "scale") as number) ?? 1,
+              });
+            },
+          });
+        },
+      },
+      "-=0.5" // Sincronização uniforme com o restante dos elementos
+    );
+  }
+
+  setIsExpanded(true);
+};
 
   function persistLayout(layout: SavedLayout) {
     try {
@@ -575,10 +606,16 @@ export default function TelaModificacao({
         </section>
       </div>
 
-      <div ref={baixoRef} className={styles.baixoWrapper}
-      style={{
-        top:"1000px"
-      }}>
+      <div
+        ref={baixoRef}
+        className={styles.baixoWrapper}
+        style={{
+          position: "fixed",
+          top: "100%",
+          opacity: 0,
+          pointerEvents: isExpanded ? "auto" : "none",
+        }}
+      >
         <section className={styles.baixoCard}>
           <div
             style={{

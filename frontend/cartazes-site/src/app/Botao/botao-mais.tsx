@@ -3,6 +3,7 @@
 import Modal from "@/components/modal-mais-opcoes";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 type Props = {
     corFundo: string;
@@ -21,7 +22,6 @@ export function Botemais({ corFundo, opcao1, opcao2 }: Props) {
                 style={{
                     position: "absolute",
                     bottom: "-17px",
-                    background: "rgb(158, 12, 5)",
                     color: "white",
                     border: "none",
                     borderRadius: "10px",
@@ -32,11 +32,11 @@ export function Botemais({ corFundo, opcao1, opcao2 }: Props) {
                     fontSize: "18px",
                     fontWeight: "bold",
                     cursor: "pointer",
-                    boxShadow: "4px 4px 12px 0px rgba(0,0,0,0.28)",
+                    // boxShadow: "4px 4px 12px 0px rgba(0,0,0,0.28)",
                 }}
                 className="boteemais"
             >
-                {aberto ? "×" : "▼"}
+                {aberto ? "×" : <ExpandMoreIcon />}
             </button>
             
             <Modal 
@@ -48,3 +48,4 @@ export function Botemais({ corFundo, opcao1, opcao2 }: Props) {
         </div>
     );
 }
+

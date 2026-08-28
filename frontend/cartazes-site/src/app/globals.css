@@ -36,13 +36,14 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 16px 32px;
+  background: linear-gradient(90deg, rgb(218, 37, 28) 0%, rgb(156, 12, 4) 100%);
   background-color: rgb(218, 37, 28);
   color: white;
 }
 
 .side-bar {
   grid-area: sidebar;
-  background-color: rgb(51, 52, 60);
+  background: linear-gradient(180deg, rgb(51, 52, 60) 0%, rgb(38, 39, 45) 100%);
   color: white;
   display: flex;
   flex-direction: column;
@@ -96,10 +97,12 @@ body {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(255, 255, 255, 0.06),
-      transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.06),
+    transparent
+  );
   transition: left 0.5s ease;
 }
 
@@ -124,9 +127,50 @@ body {
   outline-offset: -2px;
 }
 
-/* Pega o elemento que sobra (o {children}, ou seja, o conteúdo da página)
-   e coloca ele na área "content" do grid */
-body>*:not(.cabeçalho):not(.side-bar) {
+.icon-overlay-container {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+
+  height: 1.5rem;
+
+  font-size: 1.5rem;
+}
+
+.icon-overlay-container svg {
+  position: absolute;
+
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s ease;
+}
+
+.icon-overlay-container .icon-base {
+  fill: currentColor;
+
+  z-index: 1;
+}
+
+.icon-overlay-container .icon-fill {
+  fill: #d81e2c;
+
+  z-index: 2;
+
+  clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+
+  transition: clip-path 0.3s ease-in-out;
+}
+
+.side-bar button:hover .icon-overlay-container .icon-fill {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+body > *:not(.cabeçalho):not(.side-bar) {
   grid-area: content;
 }
 
@@ -176,10 +220,7 @@ ul {
   cursor: pointer;
 }
 
-.secCardCartaz:hover {
-  height: 300px;
-  /* box-shadow: 8px 8px 32px 0px rgba(0,0,0,0.65); */
-}
+
 
 .textohead {
   display: flex;
@@ -317,13 +358,9 @@ a:hover {
   position: fixed;
 }
 
-.boteemais:focus {
-  background-color: #940909;
-}
-
 .boteemais:hover {
-  filter: brightness(0.9);
-  background-color: #6e0202;
+  filter: brightness(0.7);
+  /* background-color: #6e0202; */
 }
 
 .opcao-botao:hover {
@@ -384,8 +421,8 @@ a:hover {
 }
 
 /* Quando o input está focado OU já tem texto digitado */
-.animacaixa input:focus~label,
-.animacaixa input:not(:placeholder-shown)~label {
+.animacaixa input:focus ~ label,
+.animacaixa input:not(:placeholder-shown) ~ label {
   top: 0;
   transform: translateY(-100%);
   opacity: 1;
@@ -434,7 +471,7 @@ a:hover {
 }
 
 /* Botão "x" de fechar */
-.Edicao>section>button:first-of-type {
+.Edicao > section > button:first-of-type {
   float: right;
   background: transparent;
   border: none;
@@ -447,7 +484,7 @@ a:hover {
   transition: background-color 0.15s ease;
 }
 
-.Edicao>section>button:first-of-type:hover {
+.Edicao > section > button:first-of-type:hover {
   background: rgb(240, 240, 243);
   color: rgb(40, 40, 45);
 }
@@ -602,9 +639,11 @@ a:hover {
   left: 0;
   right: 0;
   bottom: 0;
-  background: radial-gradient(circle at var(--mouse-x) var(--mouse-y),
-      var(--spotlight-color),
-      transparent 80%);
+  background: radial-gradient(
+    circle at var(--mouse-x) var(--mouse-y),
+    var(--spotlight-color),
+    transparent 80%
+  );
   opacity: 0;
   transition: opacity 0.5s ease;
   pointer-events: none;
@@ -759,35 +798,44 @@ a:hover {
   }
 } */
 
-
 .textocomborda {
   font-size: 40px;
   color: white;
-
 }
-
-
 
 .hoverChoose:hover {
   background-color: rgb(25, 25, 37);
 }
 
-.VizualizacaoCard{
+.VizualizacaoCard {
   border-radius: 20px;
- 
+
   height: 50vh;
   width: 50vw;
 }
 
-.CarrosselRep{
+.CarrosselRep {
   background-color: rgb(37, 177, 25);
-
 }
 
-.botao-EditLay:hover{
+.botao-EditLay:hover {
   cursor: pointer;
 }
 
-.botao-SaveLay:hover{
+.botao-SaveLay:hover {
   cursor: pointer;
 }
+
+/* 
+.seguirHead {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #530000bf;
+    box-shadow:
+        0 0 15px #530000bf,
+        0 0 35px #530000bf;
+    pointer-events: none;
+    z-index: 0;
+} */
