@@ -8,6 +8,7 @@ import { Flip } from "gsap/Flip";
 import styles from "./TelaModificacao.module.css";
 import WidgetCard, { CardState, WIDGET_LIBRARY } from "./WidgetCards";
 import BotaoCores from "@/app/Botao/botao-cores";
+import Scale from "@/components/aumentar-diminuir";
 
 type Props = {
   corFundo?: string;
@@ -21,20 +22,38 @@ if (typeof window !== "undefined") {
 
 export interface SavedLayout {
   corFundo?: string;
-  carrossel: { x: number; y: number; scale: number };
-  widgets: { id: string; type: CardState["type"]; x: number; y: number }[];
+  elSize: { width: number; height: number };
+  carrossel: { x: number; y: number; width: number; height: number };
+  widgets: {
+    id: string;
+    type: CardState["type"];
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }[];
 }
 
-const STORAGE_KEY = "tela-modificacao-layout";
+function measureRelativeBox(
+  node: Element | null,
+  reference: Element | null
+): { x: number; y: number; width: number; height: number } | null {
+  if (!node || !reference) return null;
+  const nodeRect = node.getBoundingClientRect();
+  const refRect = reference.getBoundingClientRect();
+  return {
+    x: nodeRect.left - refRect.left,
+    y: nodeRect.top - refRect.top,
+    width: nodeRect.width,
+    height: nodeRect.height,
+  };
+}
+
+export const STORAGE_KEY = "tela-modificacao-layout";
+export const LAYOUT_UPDATED_EVENT = "tela-modificacao-layout-updated";
 
 const LISTA_CORES = [
-  "white",
-  "blue",
-  "red",
-  "purple",
-  "yellow",
-  "orange",
-  "black",
+  "white", "blue", "red", "purple", "yellow", "orange", "black",
   "linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%)",
   "linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)",
   "linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)",
@@ -57,10 +76,8 @@ const initialCards: CardState[] = WIDGET_LIBRARY.map((w) => ({
   y: 0,
 }));
 
-// Tratamento seguro caso a cor seja undefined
 const getBackgroundStyle = (cor?: string): React.CSSProperties => {
   if (!cor) return { backgroundColor: "white" };
-
   const isGradient = cor.includes("gradient");
   return {
     backgroundColor: isGradient ? "transparent" : cor,
@@ -68,18 +85,23 @@ const getBackgroundStyle = (cor?: string): React.CSSProperties => {
   };
 };
 
-export default function TelaModificacao({
-  corFundo,
-  corFundoB,
-  onSave,
-}: Props) {
+export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [cards, setCards] = useState<CardState[]>(initialCards);
 
-  // Fallback para evitar estado undefined
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [corClicada, setCorClicada] = useState<string>(corFundo || "white");
+
+  const elSizeRef = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
+  const carrosselBoxRef = useRef<{ x: number; y: number; width: number; height: number }>({
+    x: 0,
+    y: 0,
+    width: 0,
+    height: 0,
+  });
+  const widgetBoxesRef = useRef<Record<string, { x: number; y: number; width: number; height: number }>>({});
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const telaAnimacaoRef = useRef<HTMLDivElement | null>(null);
@@ -88,13 +110,7 @@ export default function TelaModificacao({
   const baixoRef = useRef<HTMLDivElement | null>(null);
   const botao = useRef<HTMLDivElement | null>(null);
 
-  const originalRectRef = useRef<{
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-  } | null>(null);
-
+  const originalRectRef = useRef<{ top: number; left: number; width: number; height: number } | null>(null);
   const draggableInstanceRef = useRef<globalThis.Draggable[] | null>(null);
   const isAnimatingRef = useRef(false);
 
@@ -102,9 +118,18 @@ export default function TelaModificacao({
     x: 0,
     y: 0,
     scale: 1,
+    width: undefined as number | undefined,
+    height: undefined as number | undefined,
   });
 
   const cardNodeRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const wrapperNodeRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+  useEffect(() => {
+    if (!isExpanded) {
+      setSelectedId(null);
+    }
+  }, [isExpanded]);
 
   const mudarCor = (novaCor: string) => {
     setCorClicada(novaCor);
@@ -120,26 +145,39 @@ export default function TelaModificacao({
 
   useEffect(() => {
     setMounted(true);
-
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const saved: SavedLayout = JSON.parse(raw);
-
-        if (saved.corFundo) {
-          setCorClicada(saved.corFundo);
-        }
-
+        if (saved.corFundo) setCorClicada(saved.corFundo);
         setCards((prev) =>
           prev.map((c) => {
             const found = saved.widgets.find((w) => w.id === c.id);
             return found ? { ...c, placed: true, x: found.x, y: found.y } : c;
           })
         );
-        setCarrosselTransform(saved.carrossel);
+
+        const boxes: Record<string, { x: number; y: number; width: number; height: number }> = {};
+        saved.widgets.forEach((w) => {
+          boxes[w.id] = { x: w.x, y: w.y, width: w.width, height: w.height };
+        });
+        widgetBoxesRef.current = boxes;
+
+        if (saved.elSize) elSizeRef.current = saved.elSize;
+
+        if (saved.carrossel) {
+          carrosselBoxRef.current = saved.carrossel;
+          setCarrosselTransform({
+            x: 0,
+            y: 0,
+            scale: 1,
+            width: saved.carrossel.width,
+            height: saved.carrossel.height,
+          });
+        }
       }
     } catch {
-      // Nenhum layout salvo ainda
+      // Sem layout salvo
     }
   }, []);
 
@@ -167,17 +205,44 @@ export default function TelaModificacao({
   };
 
   const cardsSignature = useMemo(
-    () => cards.map((c) => `${c.id}:${c.placed}`).join("|"),
+    () => cards.map((c) => `${c.id}:${c.placed}:${c.x}:${c.y}`).join("|"),
     [cards]
   );
 
   function handleCardDragEnd(
     cardId: string,
+    cardType: CardState["type"],
     node: HTMLDivElement,
-    wasPlaced: boolean
+    wasPlaced: boolean,
+    dragInstance: globalThis.Draggable
   ) {
     const el = telaAnimacaoRef.current;
     if (!el) return;
+
+    if (cardType === "arrows" && wasPlaced) {
+      if (dragInstance.x > 80) {
+        requestAnimationFrame(() => {
+          const flipEls = Array.from(document.querySelectorAll<HTMLElement>("[data-flip-id]"));
+          const flipState = Flip.getState(flipEls);
+
+          flushSync(() => {
+            setCards((prev) => prev.map((c) => (c.id === cardId ? { ...c, placed: false } : c)));
+          });
+
+          gsap.set(node, { x: 0, y: 0 });
+          Flip.from(flipState, { duration: 0.45, ease: "power2.out", absolute: true });
+        });
+        return;
+      }
+
+      const cardRect = node.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      const relY = cardRect.top - elRect.top;
+
+      setCards((prev) => prev.map((c) => (c.id === cardId ? { ...c, y: relY } : c)));
+      gsap.set(node, { x: 0, y: 0 });
+      return;
+    }
 
     const overEl = Draggable.hitTest(node, el, "50%");
 
@@ -186,38 +251,40 @@ export default function TelaModificacao({
       return;
     }
 
-    const flipEls = Array.from(
-      document.querySelectorAll<HTMLElement>("[data-flip-id]")
-    );
-    const flipState = Flip.getState(flipEls);
+    requestAnimationFrame(() => {
+      const flipEls = Array.from(document.querySelectorAll<HTMLElement>("[data-flip-id]"));
+      const flipState = Flip.getState(flipEls);
 
-    if (overEl) {
-      const cardRect = node.getBoundingClientRect();
-      const elRect = el.getBoundingClientRect();
-      const relX = cardRect.left - elRect.left;
-      const relY = cardRect.top - elRect.top;
+      if (overEl) {
+        const cardRect = node.getBoundingClientRect();
+        const elRect = el.getBoundingClientRect();
+        
+        const relX = cardType === "arrows" ? 0 : cardRect.left - elRect.left;
+        const relY = cardRect.top - elRect.top;
 
-      flushSync(() => {
-        setCards((prev) =>
-          prev.map((c) =>
-            c.id === cardId ? { ...c, placed: true, x: relX, y: relY } : c
-          )
-        );
-      });
-    } else {
-      flushSync(() => {
-        setCards((prev) =>
-          prev.map((c) => (c.id === cardId ? { ...c, placed: false } : c))
-        );
-      });
-    }
+        flushSync(() => {
+          setCards((prev) =>
+            prev.map((c) => (c.id === cardId ? { ...c, placed: true, x: relX, y: relY } : c))
+          );
+        });
+        setSelectedId(cardId);
 
-    gsap.set(node, { x: 0, y: 0 });
+        const widgetRect = node.getBoundingClientRect();
+        widgetBoxesRef.current[cardId] = {
+          x: relX,
+          y: relY,
+          width: cardType === "arrows" ? elRect.width : widgetRect.width,
+          height: widgetRect.height,
+        };
+      } else {
+        flushSync(() => {
+          setCards((prev) => prev.map((c) => (c.id === cardId ? { ...c, placed: false } : c)));
+        });
+        delete widgetBoxesRef.current[cardId];
+      }
 
-    Flip.from(flipState, {
-      duration: 0.45,
-      ease: "power2.out",
-      absolute: true,
+      gsap.set(node, { x: 0, y: 0 });
+      Flip.from(flipState, { duration: 0.45, ease: "power2.out", absolute: true });
     });
   }
 
@@ -230,18 +297,44 @@ export default function TelaModificacao({
       const node = cardNodeRefs.current.get(card.id);
       if (!node) return;
 
-      const [inst] = Draggable.create(node, {
+      const oldInstance = Draggable.get(node);
+      if (oldInstance) oldInstance.kill();
+
+      gsap.set(node, { x: 0, y: 0 });
+
+      const isArrows = card.type === "arrows";
+      const handleSelector = isArrows ? `.${styles.cardLabel}, [class*="cardLabel"]` : undefined;
+
+      let dragInstance: globalThis.Draggable | null = null;
+
+      const createdInstances = Draggable.create(node, {
         type: "x,y",
-        bounds: containerRef.current ?? undefined,
-        onDragEnd() {
-          handleCardDragEnd(
-            card.id,
-            this.target as HTMLDivElement,
-            card.placed
-          );
+        handle: handleSelector,
+        zIndexBoost: false,
+        bounds: card.placed ? undefined : containerRef.current ?? undefined,
+
+        onPress: () => {
+          if (isExpanded && card.placed) {
+            setSelectedId(card.id);
+          }
+        },
+
+        onDrag: function () {
+          if (isArrows && card.placed && this.x < 0) {
+            gsap.set(node, { x: 0 });
+          }
+        },
+
+        onDragEnd: () => {
+          if (!dragInstance) return;
+          handleCardDragEnd(card.id, card.type, node, card.placed, dragInstance);
         },
       });
-      instances.push(inst);
+
+      if (createdInstances.length > 0) {
+        dragInstance = createdInstances[0];
+        instances.push(dragInstance);
+      }
     });
 
     return () => {
@@ -270,18 +363,14 @@ export default function TelaModificacao({
 
     const tl = gsap.timeline({
       onComplete: () => {
-        if (el)
-          gsap.set(el, { clearProps: "position,top,left,width,height,zIndex" });
+        if (el) gsap.set(el, { clearProps: "position,top,left,width,height,zIndex" });
         if (carrossel) gsap.set(carrossel, { clearProps: "width,height" });
-
-        // Reseta a sidebar para o estado original
         if (side) gsap.set(side, { clearProps: "all" });
-
-        // FIX: Garante que o painel inferior fique escondido e sem opacidade ao finalizar
         if (baixo) gsap.set(baixo, { top: "100%", opacity: 0 });
 
         isAnimatingRef.current = false;
         setIsExpanded(false);
+        setSelectedId(null);
         if (onCompleteCallback) onCompleteCallback();
       },
     });
@@ -297,47 +386,15 @@ export default function TelaModificacao({
     }
 
     if (side) {
-      tl.to(
-        side,
-        {
-          marginRight: "-500px",
-          opacity: 0,
-          scaleX: 1.4,
-          scaleY: 0.9,
-          duration: 0.4,
-          ease: "back.in(1.2)",
-        },
-        "-=0.3"
-      );
+      tl.to(side, { marginRight: "-500px", opacity: 0, scaleX: 1.4, scaleY: 0.9, duration: 0.4, ease: "back.in(1.2)" }, "-=0.3");
     }
 
-    // Anima o painel inferior deslizando para baixo e sumindo com opacidade
     if (baixo) {
-      tl.to(
-        baixo,
-        {
-          top: "100%",
-          opacity: 0,
-          duration: 0.5,
-          ease: "power2.in",
-        },
-        "-=0.3"
-      );
+      tl.to(baixo, { top: "100%", opacity: 0, duration: 0.5, ease: "power2.in" }, "-=0.3");
     }
 
     if (el && targetRect) {
-      tl.to(
-        el,
-        {
-          top: targetRect.top,
-          left: targetRect.left,
-          width: targetRect.width,
-          height: targetRect.height,
-          duration: 0.7,
-          ease: "expo.inOut",
-        },
-        "-=0.5"
-      );
+      tl.to(el, { top: targetRect.top, left: targetRect.left, width: targetRect.width, height: targetRect.height, duration: 0.7, ease: "expo.inOut" }, "-=0.5");
     }
 
     if (b) {
@@ -346,118 +403,66 @@ export default function TelaModificacao({
   };
 
   const handleEditLayout = () => {
-  if (isAnimatingRef.current) return;
-  if (!telaAnimacaoRef.current || !carrosselRef.current) return;
+    if (isAnimatingRef.current) return;
+    if (!telaAnimacaoRef.current || !carrosselRef.current) return;
 
-  if (isExpanded) {
-    animarSaida();
-    return;
-  }
+    if (isExpanded) {
+      animarSaida();
+      return;
+    }
 
-  isAnimatingRef.current = true;
+    isAnimatingRef.current = true;
 
-  const el = telaAnimacaoRef.current;
-  const carrossel = carrosselRef.current;
-  const side = sideAnimacaoRef.current;
-  const b = botao.current;
-  const baixo = baixoRef.current;
+    const el = telaAnimacaoRef.current;
+    const carrossel = carrosselRef.current;
+    const side = sideAnimacaoRef.current;
+    const b = botao.current;
+    const baixo = baixoRef.current;
 
-  if (draggableInstanceRef.current) {
-    draggableInstanceRef.current[0].kill();
-    draggableInstanceRef.current = null;
-  }
+    if (draggableInstanceRef.current) {
+      draggableInstanceRef.current[0].kill();
+      draggableInstanceRef.current = null;
+    }
 
-  killAllTweens();
+    killAllTweens();
 
-  const rect = el.getBoundingClientRect();
-  originalRectRef.current = {
-    top: rect.top,
-    left: rect.left,
-    width: rect.width,
-    height: rect.height,
-  };
+    const rect = el.getBoundingClientRect();
+    originalRectRef.current = {
+      top: rect.top,
+      left: rect.left,
+      width: rect.width,
+      height: rect.height,
+    };
 
-  // 1. Reseta o ponto de partida de TODOS os elementos para o estado oculto original
-  if (baixo) gsap.set(baixo, { top: "100%", opacity: 0 });
-  if (side) {
-    gsap.set(side, {
-      marginTop: "0px",
-      marginRight: "-500px",
-      opacity: 0,
-      scaleX: 1.55,
-      scaleY: 0.85,
-      transformOrigin: "right center",
-    });
-  }
-
-  const tl = gsap.timeline({
-    onComplete: () => {
-      isAnimatingRef.current = false;
-    },
-  });
-
-  // 2. Animações sincronizadas da tela, botão e painel inferior
-  tl.fromTo(b, { top: 570 }, { top: 860, duration: 0.7, ease: "expo.out" })
-    .fromTo(
-      el,
-      {
-        position: "fixed",
-        top: rect.top,
-        left: rect.left,
-        width: rect.width,
-        height: rect.height,
-        zIndex: 10,
-      },
-      {
-        top: 100,
-        left: 20,
-        width: "70vw",
-        height: "80vh",
-        duration: 0.9,
-        ease: "expo.out",
-      },
-      "<"
-    )
-    .fromTo(
-      baixo,
-      { top: "100%", opacity: 0 },
-      { top: 875, opacity: 1, duration: 0.7, ease: "expo.out" },
-      "-=0.7"
-    )
-    .fromTo(
-      carrossel,
-      {
-        width: "30%",
-        height: "80%",
-        borderRadius: "10px",
-        scale: 0.85,
-        opacity: 0.5,
-      },
-      {
-        width: "30%",
-        height: "80%",
-        borderRadius: "10px",
-        scale: carrosselTransform.scale,
-        opacity: 1,
-        duration: 0.6,
-        ease: "back.out(2.2)",
-      },
-      "-=0.5"
-    );
-
-  // 3. Animação da Sidebar (Sempre idêntica em todas as execuções)
-  if (side) {
-    tl.fromTo(
-      side,
-      {
+    if (baixo) gsap.set(baixo, { top: "100%", opacity: 0 });
+    if (side) {
+      gsap.set(side, {
         marginTop: "0px",
         marginRight: "-500px",
         opacity: 0,
         scaleX: 1.55,
         scaleY: 0.85,
         transformOrigin: "right center",
+      });
+    }
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        isAnimatingRef.current = false;
+        const finalRect = el.getBoundingClientRect();
+        elSizeRef.current = { width: finalRect.width, height: finalRect.height };
+        const box = measureRelativeBox(carrossel, el);
+        if (box) carrosselBoxRef.current = box;
       },
-      {
+    });
+
+    tl.fromTo(b, { top: 570 }, { top: 860, duration: 0.7, ease: "expo.out" })
+      .fromTo(el, { position: "fixed", top: rect.top, left: rect.left, width: rect.width, height: rect.height, zIndex: 1000 }, { top: 100, left: 20, width: "70vw", height: "80vh", duration: 0.9, ease: "expo.out" }, "<")
+      .fromTo(baixo, { top: "100%", opacity: 0 }, { top: 875, opacity: 1, duration: 0.7, ease: "expo.out" }, "-=0.7")
+      .fromTo(carrossel, { width: "30%", height: "80%", borderRadius: "10px", scale: 0.85, opacity: 0.5 }, { width: "30%", height: "80%", borderRadius: "10px", scale: carrosselTransform.scale, opacity: 1, duration: 0.6, ease: "back.out(2.2)" }, "-=0.5");
+
+    if (side) {
+      tl.fromTo(side, { marginTop: "0px", marginRight: "-500px", opacity: 0, scaleX: 1.55, scaleY: 0.85, transformOrigin: "right center" }, {
         marginTop: "0px",
         marginRight: "20px",
         opacity: 1,
@@ -472,29 +477,32 @@ export default function TelaModificacao({
             type: "x,y",
             cursor: "grab",
             activeCursor: "grabbing",
+            onPress() {
+              if (isExpanded) setSelectedId("carrossel");
+            },
             onDragEnd() {
-              setCarrosselTransform({
+              setCarrosselTransform((prev) => ({
+                ...prev,
                 x: this.x,
                 y: this.y,
                 scale: (gsap.getProperty(carrossel, "scale") as number) ?? 1,
-              });
+              }));
+              const box = measureRelativeBox(carrosselRef.current, telaAnimacaoRef.current);
+              if (box) carrosselBoxRef.current = box;
             },
           });
         },
-      },
-      "-=0.5" // Sincronização uniforme com o restante dos elementos
-    );
-  }
+      }, "-=0.5");
+    }
 
-  setIsExpanded(true);
-};
+    setIsExpanded(true);
+  };
 
   function persistLayout(layout: SavedLayout) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
-    } catch {
-      // sem localStorage disponível
-    }
+      window.dispatchEvent(new CustomEvent(LAYOUT_UPDATED_EVENT, { detail: layout }));
+    } catch {}
     onSave?.(layout);
   }
 
@@ -502,17 +510,36 @@ export default function TelaModificacao({
     if (salvando) return;
     setSalvando(true);
 
+    if (isExpanded && telaAnimacaoRef.current) {
+      const rect = telaAnimacaoRef.current.getBoundingClientRect();
+      elSizeRef.current = { width: rect.width, height: rect.height };
+
+      const carrosselBox = measureRelativeBox(carrosselRef.current, telaAnimacaoRef.current);
+      if (carrosselBox) carrosselBoxRef.current = carrosselBox;
+
+      cards
+        .filter((c) => c.placed)
+        .forEach((c) => {
+          const node = wrapperNodeRefs.current.get(c.id) || cardNodeRefs.current.get(c.id);
+          const box = measureRelativeBox(node ?? null, telaAnimacaoRef.current);
+          if (box) widgetBoxesRef.current[c.id] = box;
+        });
+    }
+
     const layout: SavedLayout = {
       corFundo: corClicada,
-      carrossel: carrosselTransform,
+      elSize: elSizeRef.current,
+      carrossel: carrosselBoxRef.current,
       widgets: cards
         .filter((c) => c.placed)
-        .map(({ id, type, x, y }) => ({ id, type, x, y })),
+        .map(({ id, type }) => {
+          const box = widgetBoxesRef.current[id] ?? { x: 0, y: 0, width: 0, height: 0 };
+          return { id, type, ...box };
+        }),
     };
 
     setTimeout(() => {
       persistLayout(layout);
-
       if (isExpanded) {
         animarSaida(() => setSalvando(false));
       } else {
@@ -530,11 +557,7 @@ export default function TelaModificacao({
     WIDGET_LIBRARY.find((w) => w.type === type)?.label ?? type;
 
   const botoesNode = (
-    <div
-      ref={botao}
-      className={styles.botoesWrapper}
-      style={{ top: 590 }}
-    >
+    <div ref={botao} className={styles.botoesWrapper} style={{ top: 590 }}>
       <button onClick={handleEditLayout} className={styles.botaoEditLay}>
         {isExpanded ? "Sair da Edição" : "Editar Layout"}
       </button>
@@ -558,33 +581,108 @@ export default function TelaModificacao({
       <div
         ref={telaAnimacaoRef}
         className={`TelaAnimacao ${styles.telaAnimacao}`}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            setSelectedId(null);
+          }
+        }}
       >
         <section
           style={getBackgroundStyle(corClicada)}
           className={`VizualizacaoCard ${styles.visualizacaoCard}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (isExpanded) setSelectedId(null);
+          }}
         >
           <section
             ref={carrosselRef}
             className={`CarrosselRep ${styles.carrossel}`}
             style={{
+              position: "relative",
               cursor: isExpanded ? "grab" : "default",
-              background:
-                "linear-gradient(180deg, rgb(51, 52, 60) 0%, rgb(38, 39, 45) 100%)",
+              background: "linear-gradient(180deg, rgb(51, 52, 60) 0%, rgb(38, 39, 45) 100%)",
             }}
-          ></section>
+            onClick={(e) => {
+              e.stopPropagation();
+              if (isExpanded) setSelectedId("carrossel");
+            }}
+          >
+            {isExpanded && selectedId === "carrossel" && (
+              <Scale
+                targetRef={carrosselRef as React.RefObject<HTMLElement>}
+                onResize={(w, h) => {
+                  setCarrosselTransform((prev) => ({ ...prev, width: w, height: h }));
+                  const box = measureRelativeBox(carrosselRef.current, telaAnimacaoRef.current);
+                  if (box) carrosselBoxRef.current = box;
+                }}
+              />
+            )}
+          </section>
         </section>
 
         {cards
           .filter((c) => c.placed)
-          .map((card) => (
-            <WidgetCard
-              key={card.id}
-              card={card}
-              label={widgetLabel(card.type)}
-              ref={registerCardNode(card.id)}
-              style={{ position: "absolute", left: card.x, top: card.y }}
-            />
-          ))}
+          .map((card) => {
+            const isArrows = card.type === "arrows";
+            const savedBox = widgetBoxesRef.current[card.id];
+            const isSelected = isExpanded && selectedId === card.id;
+
+            return (
+              <div
+                key={card.id}
+                ref={(el) => {
+                  if (el) wrapperNodeRefs.current.set(card.id, el);
+                  else wrapperNodeRefs.current.delete(card.id);
+                }}
+                style={{
+                  position: "absolute",
+                  left: isArrows ? 0 : card.x,
+                  top: card.y,
+                  width: isArrows ? "100%" : savedBox?.width ? `${savedBox.width}px` : "auto",
+                  height: savedBox?.height ? `${savedBox.height}px` : "auto",
+                  display: isArrows ? "flex" : "inline-block",
+                  justifyContent: isArrows ? "space-between" : "initial",
+                  alignItems: isArrows ? "center" : "initial",
+                  pointerEvents: "auto",
+                  boxSizing: "border-box",
+                }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (isExpanded) setSelectedId(card.id);
+                }}
+              >
+                <WidgetCard
+                  card={card}
+                  label={widgetLabel(card.type)}
+                  ref={registerCardNode(card.id)}
+                />
+                
+                {isSelected && (
+                  <Scale
+                    targetRef={{
+                      current: wrapperNodeRefs.current.get(card.id) || cardNodeRefs.current.get(card.id) || null
+                    } as React.RefObject<HTMLElement>}
+                    onResize={(w, h, x, y) => {
+                      const finalX = x !== undefined ? x : card.x;
+                      const finalY = y !== undefined ? y : card.y;
+
+                      setCards((prev) =>
+                        prev.map((c) => (c.id === card.id ? { ...c, x: finalX, y: finalY } : c))
+                      );
+
+                      widgetBoxesRef.current[card.id] = { 
+                        x: finalX, 
+                        y: finalY, 
+                        width: w, 
+                        height: h 
+                      };
+                    }}
+                  />
+                )}
+              </div>
+            );
+          })}
       </div>
 
       {mounted && createPortal(botoesNode, document.body)}

@@ -16,7 +16,7 @@ export default function Home() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [alerta, setAlerta] = useState<AlertaTipo>(null);
-
+  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const alertaRef = useRef<HTMLDivElement>(null);
@@ -24,6 +24,7 @@ export default function Home() {
 
   const { navigateWithTransition, revealPlainPage } = useTransition();
 
+   
   useGSAP(
     () => {
       revealPlainPage();
@@ -297,7 +298,7 @@ export default function Home() {
           Entrar
         </button>
 
-        <a href="/visualizador" className="link-visualizador">
+        <a  onClick={() => router.push("/site/telas/carroselVisual")} className="link-visualizador">
           Entrar como visualizador
         </a>
       </div>

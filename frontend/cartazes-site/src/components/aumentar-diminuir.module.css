@@ -1,0 +1,61 @@
+/* Container que envolve o elemento selecionado com uma borda de seleção */
+.selectionOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border: 2px solid #0072ff;
+  pointer-events: none; /* Permite clicar no conteúdo abaixo se necessário */
+  box-sizing: border-box;
+  z-index: 9999;
+}
+
+/* Estilo base para cada um dos 4 pontos de ancoragem (handles) */
+.handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #ffffff;
+  border: 2px solid #0072ff;
+  border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  pointer-events: auto; /* Habilita a interação de clique/arraste nos pontos */
+  box-sizing: border-box;
+  z-index: 10000;
+}
+
+/* Canto Superior Esquerdo */
+.tl {
+  top: -6px;
+  left: -6px;
+  cursor: nwse-resize;
+}
+
+/* Canto Superior Direito */
+.tr {
+  top: -6px;
+  right: -6px;
+  cursor: nesw-resize;
+}
+
+/* Canto Inferior Esquerdo */
+.bl {
+  bottom: -6px;
+  left: -6px;
+  cursor: nesw-resize;
+}
+
+/* Canto Inferior Direito */
+.br {
+  bottom: -6px;
+  right: -6px;
+  cursor: nwse-resize;
+}
+
+/* Efeito ao passar o mouse ou clicar nos pontos */
+.handle:hover {
+  background-color: #0072ff;
+  transform: scale(1.2);
+  transition: transform 0.1s ease, background-color 0.1s ease;
+}

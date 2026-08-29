@@ -1,6 +1,7 @@
 import SpotlightCard from "@/components/SpotlightCard";
 import { Bot } from "../../../Botao/botao-criar";
 import { Cards } from "../../../Cartao/Card";
+import Scale from "@/components/aumentar-diminuir";
 
 export default function Home() {
   return (
@@ -116,6 +117,18 @@ export default function Home() {
           <li className="thirdLi">Evento Sexta</li>
         </ul>
       </div>
+
+
+
+
+
+
+
+
+
+
+
     </div>
+
   );
 }

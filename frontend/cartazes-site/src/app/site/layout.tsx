@@ -14,10 +14,9 @@ import SubtitlesIcon from "@mui/icons-material/Subtitles";
 import EditDocumentIcon from "@mui/icons-material/EditDocument";
 import EditSquareIcon from "@mui/icons-material/EditSquare";
 import IconButton from "@mui/material/IconButton";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Modal from "@/components/modal-mudar";
-
-
+import gsap from "gsap";
 
 export default function SiteLayout({
   children,
@@ -29,8 +28,29 @@ export default function SiteLayout({
   const router = useRouter();
   const { revealHeaderAndSidebar } = useTransition();
   const [avatarUsuario, setAvatarUsuario] = useState<string>("/broken-image.jpg");
+
+  const footerItemsRef = useRef<(HTMLElement | null)[]>([]);
+  const hrRef = useRef<HTMLHRElement | null>(null);
+
   useGSAP(() => {
     revealHeaderAndSidebar();
+
+    const tl = gsap.timeline({ defaults: { ease: "power2.out" } });
+
+    // Anima o Avatar, Nome e Botão de Ícone com a mesma animação e stagger
+    tl.from(footerItemsRef.current.filter(Boolean), {
+      opacity: 0,
+      y: 15,
+      duration: 0.5,
+      stagger: 0.1,
+    })
+    // Anima a opacidade do <hr> com 0.3 segundos após os itens aparecerem
+    .fromTo(
+      hrRef.current,
+      { opacity: 0 },
+      { opacity: 1, duration: 0.5 },
+      "+=0.3"
+    );
   }, []);
 
   return (
@@ -109,54 +129,6 @@ export default function SiteLayout({
           Modificar Layout
         </button>
 
-        {/* Rodapé
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-end",
-            
-            height: "100%",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignContent: "center",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <hr style={{ width: "150%", color: "hsl(240, 7%, 38%)" }} />
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              textAlign: "center",
-              gap: "20px",
-              alignItems: "stretch",
-              padding: "28px",
-            }}
-          >
-            <Stack direction="row" spacing={2}>
-              <Avatar src={avatarUsuario} />
-            </Stack>
-            <h1 style={{ fontSize: "25px" }}>{nomeUsuario}</h1>
-
-            <IconButton className="botaoEditI" onClick={() => setAberto(true)}>
-              <EditSquareIcon style={{ height: "25px", width: "19px" }} />
-            </IconButton>
-
-
-            <Modal isOpen={aberto} onClose={() => setAberto(false)}
-              onSave={(novoNome, novoAvatar) => {
-              if (novoNome.trim() != "" ) setNomeUsuario(novoNome);
-              if (novoAvatar) setAvatarUsuario(novoAvatar);
-              }}
-                />
-          </div>
-        </div> */}
         {/* Rodapé */}
         <div
           style={{
@@ -175,26 +147,47 @@ export default function SiteLayout({
               justifyContent: "center",
             }}
           >
-            <hr style={{ width: "150%", color: "hsl(240, 7%, 38%)" }} />
+            <hr
+              ref={hrRef}
+              style={{ width: "150%", color: "hsl(240, 7%, 38%)" }}
+            />
           </div>
 
           <div
             style={{
               display: "flex",
-              gap: "12px", // Reduzido levemente para alinhar melhor o botão
-              alignItems: "center", // Centraliza verticalmente na altura do Avatar
+              gap: "12px",
+              alignItems: "center",
               padding: "20px 28px",
             }}
           >
-            <Stack direction="row" spacing={2}>
+            <Stack
+              direction="row"
+              spacing={2}
+              ref={(el) => {
+                footerItemsRef.current[0] = el;
+              }}
+            >
               <Avatar src={avatarUsuario} />
             </Stack>
 
-            <h1 style={{ fontSize: "22px", margin: 0, lineHeight: 1 }}>
+            <h1
+              ref={(el) => {
+                footerItemsRef.current[1] = el;
+              }}
+              style={{ fontSize: "22px", margin: 0, lineHeight: 1 }}
+            >
               {nomeUsuario}
             </h1>
 
-            <IconButton className="botaoEditI" onClick={() => setAberto(true)} style={{ padding: 4 }}>
+            <IconButton
+              ref={(el) => {
+                footerItemsRef.current[2] = el;
+              }}
+              className="botaoEditI"
+              onClick={() => setAberto(true)}
+              style={{ padding: 4 }}
+            >
               <EditSquareIcon style={{ height: "20px", width: "20px" }} />
             </IconButton>
 
