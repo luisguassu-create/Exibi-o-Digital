@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
+
 gsap.registerPlugin(useGSAP);
 
 type ModalConfirmacaoProps = {
@@ -32,7 +33,7 @@ export default function ModalConfirmacaoV({
     }, [isOpen]);
 
     function Visualizar() {
-        router.push('@/components/tela-carrosel-full-screen');
+        router.push("/site/telas/carroselVisual");
     }
 
     const { contextSafe } = useGSAP(

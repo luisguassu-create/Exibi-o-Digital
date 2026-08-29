@@ -4,7 +4,7 @@ import { Cards } from "../../../Cartao/Card";
 
 export default function Home() {
   return (
-    <div className="dash">
+    <div className="dash"  >
       <h1
         style={{
           color: " black",
