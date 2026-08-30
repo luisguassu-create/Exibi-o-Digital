@@ -1,11 +1,11 @@
 "use client"
 
 // Coverflow Carousel — Originkit
-// Agora conectado à Tela de Modificação: lê o layout salvo (cor de fundo,
-// posição/tamanho do carrossel e dos widgets) e aplica na tela de visualização.
+// Conectado à Tela de Modificação: lê o layout salvo e aplica na tela de visualização.
 
 import * as React from "react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import {
     motion,
     AnimatePresence,
@@ -26,11 +26,9 @@ const RenderTarget = {
 }
 
 // -----------------------------------------------------------------------------
-// NOVO: contrato com a Tela de Modificação
+// Contrato com a Tela de Modificação
 // -----------------------------------------------------------------------------
 
-// Mesma chave usada em TelaModificacao.tsx — é assim que as duas telas
-// "conversam" (via localStorage), sem precisar de um estado global.
 const STORAGE_KEY = "tela-modificacao-layout"
 const LAYOUT_UPDATED_EVENT = "tela-modificacao-layout-updated"
 
@@ -43,12 +41,6 @@ type SavedWidget = {
     height: number
 }
 
-// Estrutura equivalente à `SavedLayout` exportada por TelaModificacao.tsx.
-// Se preferir, troque por: `import type { SavedLayout } from "../TelaModificacao/TelaModificacao"`
-//
-// x/y/width/height do carrossel e de cada widget são sempre a CAIXA FINAL
-// RENDERIZADA no editor (relativa ao `el`), não valores de transform. Não
-// precisamos mais de um "scale" isolado — o tamanho já vem pronto.
 export type SavedLayout = {
     corFundo?: string
     elSize: { width: number; height: number }
@@ -75,13 +67,6 @@ function readSavedLayout(): SavedLayout | null {
     }
 }
 
-/**
- * Hook que mantém o layout salvo pela Tela de Modificação sempre atualizado:
- * - lê do localStorage assim que monta
- * - escuta o evento customizado (disparado na mesma aba quando o usuário salva)
- * - escuta o evento nativo "storage" (disparado quando o salvamento acontece
- *   em outra aba/rota)
- */
 function useSavedLayout(overrideLayout?: SavedLayout | null) {
     const [layout, setLayout] = useState<SavedLayout | null>(overrideLayout ?? null)
 
@@ -139,8 +124,6 @@ type Props = {
     autoplayDirection?: "leftToRight" | "rightToLeft"
     transition?: any
     style?: React.CSSProperties
-    // NOVO: permite injetar o layout diretamente via prop (ex: vindo de um
-    // contexto/estado do app) em vez de depender só do localStorage.
     layout?: SavedLayout | null
 }
 
@@ -232,7 +215,6 @@ function Card({
     index,
     pos,
     count,
-    R,
     sizing,
     gap,
     radius,
@@ -276,18 +258,8 @@ function Card({
         )
     })
     const borderRadius = useTransform(pos, (p: number) => {
-        const a = blendForRel(relOf(index, p, count))
-        const w =
-            sizing.activeWidth + (sizing.restWidth - sizing.activeWidth) * a
-        const h =
-            sizing.activeHeight + (sizing.restHeight - sizing.activeHeight) * a
-        return (Math.max(0, Math.min(20, radius)) / 20) * (Math.min(w, h) / 2)
+        return radius
     })
-    const boxShadow = useTransform(pos, (p: number) =>
-        Math.abs(relOf(index, p, count)) < 0.5
-            ? "0 24px 70px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(255,255,255,0.06)"
-            : "0 14px 40px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.05)"
-    )
 
     return (
         <motion.div
@@ -311,7 +283,6 @@ function Card({
                     borderRadius,
                     overflow: "hidden",
                     background: gradient,
-                    boxShadow,
                 }}
             >
                 {src ? (
@@ -336,9 +307,7 @@ function Card({
 }
 
 // -----------------------------------------------------------------------------
-// NOVO: conteúdo real de cada widget na tela de visualização (não é mais um
-// badge tipo pílula — segue o mesmo visual do card "Horário / Temperatura").
-// Ajuste os tipos/labels aqui conforme os tipos reais do seu WIDGET_LIBRARY.
+// Widgets
 // -----------------------------------------------------------------------------
 
 function ClockWidgetContent({ labelColor }: { labelColor: string }) {
@@ -363,8 +332,6 @@ function ClockWidgetContent({ labelColor }: { labelColor: string }) {
 }
 
 function WeatherWidgetContent({ labelColor }: { labelColor: string }) {
-    // Sem integração com uma API de clima ainda — troque por dados reais
-    // quando tiver uma fonte (props, fetch, etc).
     return (
         <>
             <span style={{ color: labelColor, fontSize: 13, fontWeight: 500 }}>Temperatura</span>
@@ -373,8 +340,19 @@ function WeatherWidgetContent({ labelColor }: { labelColor: string }) {
     )
 }
 
-function ArrowsWidgetContent({ onPrev, onNext }: { onPrev: () => void; onNext: () => void }) {
+function ArrowOverlayButtons({
+    y,
+    onPrev,
+    onNext,
+}: {
+    y: number
+    onPrev: () => void
+    onNext: () => void
+}) {
     const btnStyle: React.CSSProperties = {
+        position: "absolute",
+        top: y,
+        transform: "translateY(-50%)",
         width: 40,
         height: 40,
         borderRadius: "50%",
@@ -386,36 +364,45 @@ function ArrowsWidgetContent({ onPrev, onNext }: { onPrev: () => void; onNext: (
         alignItems: "center",
         justifyContent: "center",
         cursor: "pointer",
+        zIndex: 900,
+        pointerEvents: "auto",
+        boxShadow: "0 6px 16px rgba(0,0,0,0.35)",
     }
+
     return (
-        <div style={{ display: "flex", gap: 12, alignItems: "center", justifyContent: "center", width: "100%", height: "100%" }}>
-            <button style={btnStyle} onClick={(e) => { e.stopPropagation(); onPrev() }}>
+        <>
+            <button
+                style={{ ...btnStyle, left: 16 }}
+                onClick={(e) => {
+                    e.stopPropagation()
+                    onPrev()
+                }}
+            >
                 ‹
             </button>
-            <button style={btnStyle} onClick={(e) => { e.stopPropagation(); onNext() }}>
+            <button
+                style={{ ...btnStyle, right: 16 }}
+                onClick={(e) => {
+                    e.stopPropagation()
+                    onNext()
+                }}
+            >
                 ›
             </button>
-        </div>
+        </>
     )
 }
 
 function WidgetOverlay({
     widget,
     scale,
-    onPrev,
-    onNext,
 }: {
     widget: SavedWidget
     scale: number
-    onPrev: () => void
-    onNext: () => void
 }) {
-    const isArrows = widget.type === "arrows"
     const isClock = widget.type === "clock"
     const isWeather = widget.type === "weather"
 
-    // Fonte/padding acompanham a escala pra não ficarem desproporcionais em
-    // telas muito maiores/menores que o editor.
     const fontScale = Math.min(1.4, Math.max(0.6, scale))
 
     const cardStyle: React.CSSProperties = {
@@ -425,12 +412,12 @@ function WidgetOverlay({
         width: widget.width * scale,
         height: widget.height * scale,
         zIndex: 900,
-        pointerEvents: isArrows ? "auto" : "none",
+        pointerEvents: "none",
         borderRadius: 14 * fontScale,
-        background: isArrows ? "transparent" : "rgba(255,255,255,0.07)",
-        boxShadow: isArrows ? "none" : "0 12px 30px rgba(0,0,0,0.35)",
-        backdropFilter: isArrows ? undefined : "blur(6px)",
-        padding: isArrows ? 0 : `${10 * fontScale}px ${16 * fontScale}px`,
+        background: "rgba(255,255,255,0.07)",
+        boxShadow: "0 12px 30px rgba(0,0,0,0.35)",
+        backdropFilter: "blur(6px)",
+        padding: `${10 * fontScale}px ${16 * fontScale}px`,
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
@@ -445,7 +432,6 @@ function WidgetOverlay({
     )
     if (isClock) content = <ClockWidgetContent labelColor="#d8b98f" />
     if (isWeather) content = <WeatherWidgetContent labelColor="#a9b8f5" />
-    if (isArrows) content = <ArrowsWidgetContent onPrev={onPrev} onNext={onNext} />
 
     return <div style={cardStyle}>{content}</div>
 }
@@ -461,7 +447,7 @@ const COMPONENT_DEFAULTS = {
     restWidth: 200,
     restHeight: 270,
     gap: 30,
-    radius: 2,
+    radius: 12,
     showArrows: true,
     arrowColor: "#000000",
     arrowBackground: "#FFFFFF",
@@ -484,16 +470,15 @@ const COMPONENT_DEFAULTS = {
 export default function CoverflowCarousel(props: Props) {
     const [mostrarBotao, setMostrarBotao] = useState(false)
     const [aberto, setAberto] = useState(false)
+    const [mounted, setMounted] = useState(false)
     const router = useRouter()
 
-    // NOVO: layout vindo da Tela de Modificação (prop ou localStorage)
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
     const savedLayout = useSavedLayout(props.layout)
 
-    // NOVO: mede o "palco" (a tela cheia disponível) para calcular o
-    // "delimitador" — uma área do MESMO FORMATO do `el` do editor
-    // (elSize), só que escalada pra caber na tela real, mantendo a
-    // proporção (como um `object-fit: contain`). É essa área que vira, de
-    // fato, a versão "grande" do `el` da tela de modificação.
     const stageRef = useRef<HTMLDivElement | null>(null)
     const [stageSize, setStageSize] = useState({ width: 0, height: 0 })
 
@@ -523,8 +508,6 @@ export default function CoverflowCarousel(props: Props) {
 
     const elSize = savedLayout?.elSize
 
-    // Um ÚNICO fator de escala (não X e Y separados) — assim a proporção do
-    // editor é preservada e nada fica esticado/distorcido.
     const scale = useMemo(() => {
         if (!elSize || !elSize.width || !elSize.height || !stageSize.width || !stageSize.height) {
             return 1
@@ -532,12 +515,10 @@ export default function CoverflowCarousel(props: Props) {
         return Math.min(stageSize.width / elSize.width, stageSize.height / elSize.height)
     }, [elSize, stageSize])
 
-    // Tamanho final do delimitador (o `el` "grande"), centralizado no palco.
     const delimiterWidth = elSize ? elSize.width * scale : stageSize.width
     const delimiterHeight = elSize ? elSize.height * scale : stageSize.height
 
     function clicouTela() {
-        // Se o modal estiver aberto, ignora cliques na tela para não esconder o botão de fundo
         if (aberto) return
         setMostrarBotao((prev) => !prev)
     }
@@ -572,9 +553,18 @@ export default function CoverflowCarousel(props: Props) {
     )
     const count = Math.max(1, images.length)
 
+    const hasLayout = !!savedLayout && !!elSize
+    const carrossel = savedLayout?.carrossel
+
+    // Ajusta activeWidth e activeHeight exatamente para o tamanho do carrosselRef
     const sizing: Sizing = useMemo(
-        () => ({ restWidth, restHeight, activeWidth, activeHeight }),
-        [restWidth, restHeight, activeWidth, activeHeight]
+        () => ({
+            restWidth: hasLayout ? carrossel!.width * scale * 0.7 : restWidth * scale,
+            restHeight: hasLayout ? carrossel!.height * scale * 0.7 : restHeight * scale,
+            activeWidth: hasLayout ? carrossel!.width * scale : activeWidth * scale,
+            activeHeight: hasLayout ? carrossel!.height * scale : activeHeight * scale,
+        }),
+        [restWidth, restHeight, activeWidth, activeHeight, hasLayout, carrossel, scale]
     )
 
     const moveDur =
@@ -703,13 +693,6 @@ export default function CoverflowCarousel(props: Props) {
         return () => window.removeEventListener("keydown", onKey)
     }, [isStatic, goPrev, goNext])
 
-    // NOVO: se houver layout salvo, o container do carrossel é posicionado e
-    // dimensionado de acordo com o que foi definido no editor, dentro do
-    // delimitador (escalado com um único fator, sem distorção). Sem layout
-    // salvo, mantém o comportamento padrão (caixa centralizada em tela cheia).
-    const hasLayout = !!savedLayout && !!elSize
-    const carrossel = savedLayout?.carrossel
-
     const containerStyle: React.CSSProperties = hasLayout
         ? {
               ...style,
@@ -718,25 +701,19 @@ export default function CoverflowCarousel(props: Props) {
               top: carrossel!.y * scale,
               width: carrossel!.width * scale,
               height: carrossel!.height * scale,
-              // "blue" era um placeholder — o container do carrossel usa um
-              // fundo neutro (igual ao "CarrosselRep" do editor), já que a
-              // cor escolhida pelo usuário vai para o fundo da TELA
-              // (delimitador), não do carrossel em si.
-              background: "linear-gradient(180deg, rgb(51, 52, 60) 0%, rgb(38, 39, 45) 100%)",
+              background: "transparent",
               overflow: "hidden",
               userSelect: "none",
               touchAction: isStatic ? undefined : "pan-y",
               outline: "none",
-              borderRadius: 10,
+              borderRadius: radius,
           }
         : {
               ...style,
               position: "relative",
-              background: "linear-gradient(180deg, rgb(51, 52, 60) 0%, rgb(38, 39, 45) 100%)",
+              background: "transparent",
               width: "100%",
               height: "100%",
-              minWidth: 3000,
-              minHeight: 240,
               overflow: "hidden",
               userSelect: "none",
               touchAction: isStatic ? undefined : "pan-y",
@@ -760,10 +737,6 @@ export default function CoverflowCarousel(props: Props) {
         />
     ))
 
-    // NOVO: fundo da TELA de visualização = cor escolhida no editor (corFundo).
-    // Antes era sempre um overlay preto semitransparente ("bg-black/50"). O
-    // próprio palco inteiro (fixed inset-0) recebe essa cor — é ele que
-    // representa o `el` da tela de modificação agora.
     const stageBackgroundStyle = getBackgroundStyle(savedLayout?.corFundo)
 
     return (
@@ -774,10 +747,6 @@ export default function CoverflowCarousel(props: Props) {
             onClick={clicouTela}
         >
             {hasLayout ? (
-                // NOVO: "delimitador" — mesma proporção do `el` do editor,
-                // escalado com um único fator e centralizado no palco. Tudo
-                // que está dentro dele (carrossel + widgets) usa a MESMA
-                // escala, então as proporções batem exatamente com o editor.
                 <div
                     style={{
                         position: "absolute",
@@ -788,7 +757,8 @@ export default function CoverflowCarousel(props: Props) {
                         transform: "translate(-50%, -50%)",
                     }}
                 >
-                    <div className="overflow-hidden rounded-lg text-black shadow-2xl" style={containerStyle}>
+                    {/* Container que limita estritamente as bordas do carrosselRef */}
+                    <div style={containerStyle}>
                         <div
                             style={{
                                 position: "absolute",
@@ -802,19 +772,24 @@ export default function CoverflowCarousel(props: Props) {
                         </div>
                     </div>
 
-                    {/* NOVO: widgets posicionados no editor, na mesma escala do delimitador */}
-                    {savedLayout!.widgets.map((widget) => (
-                        <WidgetOverlay
-                            key={widget.id}
-                            widget={widget}
-                            scale={scale}
-                            onPrev={goPrev}
-                            onNext={goNext}
-                        />
-                    ))}
+                    {savedLayout!.widgets.map((widget) =>
+                        widget.type === "arrows" ? (
+                            <ArrowOverlayButtons
+                                key={widget.id}
+                                y={widget.y * scale}
+                                onPrev={goPrev}
+                                onNext={goNext}
+                            />
+                        ) : (
+                            <WidgetOverlay
+                                key={widget.id}
+                                widget={widget}
+                                scale={scale}
+                            />
+                        )
+                    )}
                 </div>
             ) : (
-                // Fallback: nenhum layout salvo ainda — comportamento padrão antigo
                 <div className="flex h-full w-full items-center justify-center p-4">
                     <div className="w-full max-w-[900px] overflow-hidden rounded-lg bg-white p-6 text-black shadow-2xl" style={containerStyle}>
                         <div
@@ -841,10 +816,10 @@ export default function CoverflowCarousel(props: Props) {
                         exit={{ opacity: 0, y: 30, x: "-50%" }}
                         transition={{ duration: 0.3, ease: "easeInOut" }}
                         style={{
-                            position: "absolute",
+                            position: "fixed",
                             bottom: "20px",
                             left: "50%",
-                            zIndex: 2000,
+                            zIndex: 10000,
                             padding: "10px 20px",
                             background: "rgb(255, 254, 254)",
                             color: "black",
@@ -854,8 +829,8 @@ export default function CoverflowCarousel(props: Props) {
                         }}
                         className="botaoLow"
                         onClick={(e) => {
-                            e.stopPropagation() // Não fecha o botão ao clicar nele
-                            setAberto(true)      // Abre o modal de confirmação
+                            e.stopPropagation()
+                            setAberto(true)
                         }}
                     >
                         Sair da Visualização
@@ -863,8 +838,11 @@ export default function CoverflowCarousel(props: Props) {
                 )}
             </AnimatePresence>
 
-            {/* Modal montado separadamente do botão */}
-            <ModalSair isOpen={aberto} onClose={() => setAberto(false)} />
+            {/* Modal via Portal */}
+            {mounted && createPortal(
+                <ModalSair isOpen={aberto} onClose={() => setAberto(false)} />,
+                document.body
+            )}
         </div>
     )
 }

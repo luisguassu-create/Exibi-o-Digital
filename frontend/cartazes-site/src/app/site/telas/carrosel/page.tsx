@@ -8,7 +8,6 @@ import { Flip } from "gsap/Flip";
 import styles from "./TelaModificacao.module.css";
 import WidgetCard, { CardState, WIDGET_LIBRARY } from "./WidgetCards";
 import BotaoCores from "@/app/Botao/botao-cores";
-import Scale from "@/components/aumentar-diminuir";
 
 type Props = {
   corFundo?: string;
@@ -85,6 +84,156 @@ const getBackgroundStyle = (cor?: string): React.CSSProperties => {
   };
 };
 
+type ResizeBox = { x: number; y: number; width: number; height: number };
+
+function cursorForHandle(handle: string): string {
+  if (handle === "n" || handle === "s") return "ns-resize";
+  if (handle === "e" || handle === "w") return "ew-resize";
+  if (handle === "ne" || handle === "sw") return "nesw-resize";
+  return "nwse-resize";
+}
+
+function handleOffsetStyle(handle: string): React.CSSProperties {
+  const HALF = 6;
+  const style: React.CSSProperties = {};
+  if (handle.includes("n")) style.top = -HALF;
+  if (handle.includes("s")) style.bottom = -HALF;
+  if (handle.includes("w")) style.left = -HALF;
+  if (handle.includes("e")) style.right = -HALF;
+  if (!handle.includes("n") && !handle.includes("s")) {
+    style.top = "50%";
+    style.marginTop = -HALF;
+  }
+  if (!handle.includes("w") && !handle.includes("e")) {
+    style.left = "50%";
+    style.marginLeft = -HALF;
+  }
+  return style;
+}
+
+function ResizeHandles({
+  targetRef,
+  handles,
+  minWidth = 40,
+  minHeight = 30,
+  onResizeEnd,
+}: {
+  targetRef: React.RefObject<HTMLElement>;
+  handles: string[];
+  minWidth?: number;
+  minHeight?: number;
+  onResizeEnd: (box: ResizeBox) => void;
+}) {
+  const dragRef = useRef<{
+    handle: string;
+    startX: number;
+    startY: number;
+    startWidth: number;
+    startHeight: number;
+    startLeft: number;
+    startTop: number;
+  } | null>(null);
+
+  const startDrag = (handle: string) => (e: React.PointerEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const target = targetRef.current;
+    if (!target) return;
+
+    try {
+      (e.currentTarget as Element).setPointerCapture(e.pointerId);
+    } catch {}
+
+    dragRef.current = {
+      handle,
+      startX: e.clientX,
+      startY: e.clientY,
+      startWidth: target.offsetWidth,
+      startHeight: target.offsetHeight,
+      startLeft: target.offsetLeft,
+      startTop: target.offsetTop,
+    };
+
+    const onMove = (ev: PointerEvent) => {
+      const state = dragRef.current;
+      const node = targetRef.current;
+      if (!state || !node) return;
+
+      const dx = ev.clientX - state.startX;
+      const dy = ev.clientY - state.startY;
+
+      let width = state.startWidth;
+      let height = state.startHeight;
+      let left = state.startLeft;
+      let top = state.startTop;
+
+      if (state.handle.includes("e")) width = Math.max(minWidth, state.startWidth + dx);
+      if (state.handle.includes("w")) {
+        width = Math.max(minWidth, state.startWidth - dx);
+        left = state.startLeft + (state.startWidth - width);
+      }
+      if (state.handle.includes("s")) height = Math.max(minHeight, state.startHeight + dy);
+      if (state.handle.includes("n")) {
+        height = Math.max(minHeight, state.startHeight - dy);
+        top = state.startTop + (state.startHeight - height);
+      }
+
+      node.style.width = `${width}px`;
+      node.style.height = `${height}px`;
+      node.style.left = `${left}px`;
+      node.style.top = `${top}px`;
+    };
+
+    const onUp = () => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      dragRef.current = null;
+      const node = targetRef.current;
+      if (!node) return;
+      onResizeEnd({
+        x: node.offsetLeft,
+        y: node.offsetTop,
+        width: node.offsetWidth,
+        height: node.offsetHeight,
+      });
+    };
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+  };
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        inset: 0,
+        border: "2px solid #5b8dff",
+        borderRadius: 6,
+        pointerEvents: "none",
+        zIndex: 950,
+      }}
+    >
+      {handles.map((h) => (
+        <div
+          key={h}
+          onPointerDown={startDrag(h)}
+          style={{
+            position: "absolute",
+            width: 12,
+            height: 12,
+            background: "#5b8dff",
+            border: "2px solid white",
+            borderRadius: 3,
+            pointerEvents: "auto",
+            cursor: cursorForHandle(h),
+            ...handleOffsetStyle(h),
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [salvando, setSalvando] = useState(false);
@@ -109,6 +258,7 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
   const sideAnimacaoRef = useRef<HTMLDivElement | null>(null);
   const baixoRef = useRef<HTMLDivElement | null>(null);
   const botao = useRef<HTMLDivElement | null>(null);
+  const listaCoresRef = useRef<HTMLDivElement | null>(null);
 
   const originalRectRef = useRef<{ top: number; left: number; width: number; height: number } | null>(null);
   const draggableInstanceRef = useRef<globalThis.Draggable[] | null>(null);
@@ -125,6 +275,52 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
   const cardNodeRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const wrapperNodeRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
+  // ---------------------------------------------------------------------------
+  // ANIMAÇÃO DE ENTRADA INICIAL (Ao carregar a tela pela primeira vez)
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      const elementosParaAnimar = [
+        telaAnimacaoRef.current,
+        botao.current
+      ].filter(Boolean);
+
+      gsap.fromTo(
+        elementosParaAnimar,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.6, stagger: 0.15, ease: "power2.out" }
+      );
+    }, containerRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  // ---------------------------------------------------------------------------
+  // Animação de entrada dos cards e botões no Side Panel & Bottom Panel
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (isExpanded) {
+      // Animação Stagger nos Cards da Sidebar
+      const elements = Array.from(cardNodeRefs.current.values());
+      if (elements.length > 0) {
+        gsap.fromTo(
+          elements,
+          { opacity: 0, y: 20, scale: 0.95 },
+          { opacity: 1, y: 0, scale: 1, duration: 0.4, stagger: 0.08, ease: "power2.out" }
+        );
+      }
+
+      // Animação nos botões da paleta de cores
+      if (listaCoresRef.current) {
+        gsap.fromTo(
+          listaCoresRef.current.children,
+          { opacity: 0, scale: 0.5 },
+          { opacity: 1, scale: 1, duration: 0.3, stagger: 0.03, ease: "back.out(1.7)", delay: 0.2 }
+        );
+      }
+    }
+  }, [isExpanded]);
+
   useEffect(() => {
     if (!isExpanded) {
       setSelectedId(null);
@@ -133,6 +329,14 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
 
   const mudarCor = (novaCor: string) => {
     setCorClicada(novaCor);
+    // Efeito visual na transição de cor de fundo
+    if (telaAnimacaoRef.current) {
+      gsap.fromTo(
+        telaAnimacaoRef.current,
+        { scale: 0.995 },
+        { scale: 1, duration: 0.3, ease: "power1.out" }
+      );
+    }
   };
 
   useEffect(() => {
@@ -176,9 +380,7 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
           });
         }
       }
-    } catch {
-      // Sem layout salvo
-    }
+    } catch {}
   }, []);
 
   useEffect(() => {
@@ -205,7 +407,7 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
   };
 
   const cardsSignature = useMemo(
-    () => cards.map((c) => `${c.id}:${c.placed}:${c.x}:${c.y}`).join("|"),
+    () => cards.map((c) => `${c.id}:${c.placed}`).join("|"),
     [cards]
   );
 
@@ -258,7 +460,7 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
       if (overEl) {
         const cardRect = node.getBoundingClientRect();
         const elRect = el.getBoundingClientRect();
-        
+
         const relX = cardType === "arrows" ? 0 : cardRect.left - elRect.left;
         const relY = cardRect.top - elRect.top;
 
@@ -317,6 +519,12 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
           if (isExpanded && card.placed) {
             setSelectedId(card.id);
           }
+          // Micro-bounce visual ao clicar para arrastar
+          gsap.to(node, { scale: 1.03, duration: 0.15, ease: "power1.out" });
+        },
+
+        onRelease: () => {
+          gsap.to(node, { scale: 1, duration: 0.2, ease: "power1.inOut" });
         },
 
         onDrag: function () {
@@ -510,6 +718,11 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
     if (salvando) return;
     setSalvando(true);
 
+    // Efeito pulsing/pulse no botão de salvar via GSAP
+    if (botao.current) {
+      gsap.to(botao.current, { scale: 0.95, duration: 0.1, yoyo: true, repeat: 1 });
+    }
+
     if (isExpanded && telaAnimacaoRef.current) {
       const rect = telaAnimacaoRef.current.getBoundingClientRect();
       elSizeRef.current = { width: rect.width, height: rect.height };
@@ -548,9 +761,20 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
     }, 900);
   }
 
-  const registerCardNode = (id: string) => (node: HTMLDivElement | null) => {
-    if (node) cardNodeRefs.current.set(id, node);
-    else cardNodeRefs.current.delete(id);
+  const registerCardNode = (id: string, stretchToFill: boolean) => (node: HTMLDivElement | null) => {
+    if (node) {
+      cardNodeRefs.current.set(id, node);
+      if (stretchToFill) {
+        node.style.width = "100%";
+        node.style.height = "100%";
+        node.style.boxSizing = "border-box";
+      } else {
+        node.style.width = "";
+        node.style.height = "";
+      }
+    } else {
+      cardNodeRefs.current.delete(id);
+    }
   };
 
   const widgetLabel = (type: CardState["type"]) =>
@@ -568,7 +792,6 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
         style={{
           backgroundColor: salvando ? "rgb(151, 104, 104)" : "hsl(0, 50%, 36%)",
           cursor: salvando ? "default" : "pointer",
-          transform: salvando ? "scale(0.96)" : "scale(1)",
         }}
       >
         {salvando ? "Salvando..." : "Salvar"}
@@ -600,6 +823,7 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
             className={`CarrosselRep ${styles.carrossel}`}
             style={{
               position: "relative",
+              boxSizing: "border-box",
               cursor: isExpanded ? "grab" : "default",
               background: "linear-gradient(180deg, rgb(51, 52, 60) 0%, rgb(38, 39, 45) 100%)",
             }}
@@ -609,12 +833,17 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
             }}
           >
             {isExpanded && selectedId === "carrossel" && (
-              <Scale
+              <ResizeHandles
                 targetRef={carrosselRef as React.RefObject<HTMLElement>}
-                onResize={(w, h) => {
-                  setCarrosselTransform((prev) => ({ ...prev, width: w, height: h }));
+                handles={["e", "se", "s"]}
+                minWidth={120}
+                minHeight={120}
+                onResizeEnd={() => {
                   const box = measureRelativeBox(carrosselRef.current, telaAnimacaoRef.current);
-                  if (box) carrosselBoxRef.current = box;
+                  if (box) {
+                    carrosselBoxRef.current = box;
+                    setCarrosselTransform((prev) => ({ ...prev, width: box.width, height: box.height }));
+                  }
                 }}
               />
             )}
@@ -655,28 +884,22 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
                 <WidgetCard
                   card={card}
                   label={widgetLabel(card.type)}
-                  ref={registerCardNode(card.id)}
+                  ref={registerCardNode(card.id, true)}
                 />
-                
-                {isSelected && (
-                  <Scale
+
+                {isSelected && !isArrows && (
+                  <ResizeHandles
                     targetRef={{
-                      current: wrapperNodeRefs.current.get(card.id) || cardNodeRefs.current.get(card.id) || null
+                      current: wrapperNodeRefs.current.get(card.id) || null,
                     } as React.RefObject<HTMLElement>}
-                    onResize={(w, h, x, y) => {
-                      const finalX = x !== undefined ? x : card.x;
-                      const finalY = y !== undefined ? y : card.y;
-
+                    handles={["nw", "n", "ne", "e", "se", "s", "sw", "w"]}
+                    minWidth={60}
+                    minHeight={40}
+                    onResizeEnd={(box) => {
                       setCards((prev) =>
-                        prev.map((c) => (c.id === card.id ? { ...c, x: finalX, y: finalY } : c))
+                        prev.map((c) => (c.id === card.id ? { ...c, x: box.x, y: box.y } : c))
                       );
-
-                      widgetBoxesRef.current[card.id] = { 
-                        x: finalX, 
-                        y: finalY, 
-                        width: w, 
-                        height: h 
-                      };
+                      widgetBoxesRef.current[card.id] = box;
                     }}
                   />
                 )}
@@ -689,7 +912,10 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
 
       <div ref={sideAnimacaoRef} className={styles.sideAnimacao}>
         <section className={styles.sideCard}>
-          <div className={styles.cardListWrapper}>
+          <div
+            className={styles.cardListWrapper}
+            style={{ padding: 30 }}
+          >
             {cards
               .filter((c) => !c.placed)
               .map((card) => (
@@ -697,7 +923,7 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
                   key={card.id}
                   card={card}
                   label={widgetLabel(card.type)}
-                  ref={registerCardNode(card.id)}
+                  ref={registerCardNode(card.id, false)}
                 />
               ))}
           </div>
@@ -716,6 +942,7 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
       >
         <section className={styles.baixoCard}>
           <div
+            ref={listaCoresRef}
             style={{
               display: "flex",
               justifyContent: "center",
