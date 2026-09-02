@@ -29,13 +29,13 @@ export default function Home() {
         { opacity: 1, y: 0, scale: 1, duration: 0.5, stagger: 0.12 },
         "-=0.3"
       )
-      // 3. Botão "Novo Cartaz" surgindo com um leve pop
-      .fromTo(
-        ".anim-button",
-        { opacity: 0, scale: 0.8, y: 20 },
-        { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" },
-        "-=0.2"
-      )
+      // // 3. Botão "Novo Cartaz" surgindo com um leve pop
+      // .fromTo(
+      //   ".anim-button",
+      //   { opacity: 0, scale: 0.8, y: 20 },
+      //   { opacity: 1, scale: 1, y: 0, duration: 0.4, ease: "back.out(1.7)" },
+      //   "-=0.2"
+      // )
       // 4. Segundo Título (Próximos Avisos)
       .fromTo(
         ".titulo",

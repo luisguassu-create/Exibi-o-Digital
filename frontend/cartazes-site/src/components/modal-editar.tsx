@@ -310,6 +310,7 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
                   type="text"
                   style={{
                     padding: "6px",
+                    color: "white",
                     borderRadius: "6px",
                     border: "1px solid #cbd5e1",
                   }}
@@ -400,6 +401,7 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
                   style={{
                     padding: "6px",
                     borderRadius: "6px",
+                    color:"white",
                     border: "1px solid #cbd5e1",
                   }}
                 />
@@ -429,6 +431,7 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
                   style={{
                     padding: "6px",
                     borderRadius: "6px",
+                    color:"white",
                     border: "1px solid #cbd5e1",
                   }}
                 />

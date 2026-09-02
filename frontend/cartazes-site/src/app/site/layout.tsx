@@ -73,7 +73,9 @@ export default function SiteLayout({
         </div>
       </header>
 
-      <nav className="side-bar">
+      <nav className="side-bar" style={{
+        height: "100%"
+      }}>
         {/* Início */}
         <button
           type="button"
@@ -99,7 +101,7 @@ export default function SiteLayout({
             <FolderIcon className="icon-base" />
             <FolderIcon className="icon-fill" aria-hidden="true" />
           </div>
-          Cartazes
+          Folders
         </button>
 
         {/* Programação */}

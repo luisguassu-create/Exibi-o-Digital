@@ -14,6 +14,14 @@ import {
     useTransform,
     type MotionValue,
 } from "framer-motion"
+
+import folder1 from "@/app/imagens/folders/Folder 1.jpg" 
+import folder2 from "@/app/imagens/folders/Folder 2.jpg" 
+import folder3 from "@/app/imagens/folders/Folder 3.jpg" 
+import folder4 from "@/app/imagens/folders/Folder 4.jpg" 
+import folder5 from "@/app/imagens/folders/Folder 5.jpg" 
+import folder6 from "@/app/imagens/folders/Folder 6.jpg" 
+
 import { useRouter } from "next/navigation"
 import ModalSair from "@/components/moda-sairVisual"
 
@@ -130,21 +138,19 @@ type Props = {
 // -----------------------------------------------------------------------------
 // Constants
 // -----------------------------------------------------------------------------
-
-const PLACEHOLDER_URLS = [
-    "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/612d1402-0ad9-4135-3bbc-a30a6a252b00/w=800",
-    "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/6d2ad64a-102d-4eab-0efe-31479e34b500/w=800",
-    "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/be854dd1-37aa-4fc7-f569-fdb948109300/w=800",
-    "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/51984031-9176-484b-f5e0-4af9a8e9ed00/w=800",
-    "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/34ce1842-4b7a-4d52-0302-38582c341700/w=800",
-    "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/88369c6d-00cc-4ac9-74ca-0f0965e06300/w=800",
-    "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/aeaa0756-9647-4f6c-d900-204bd25e4a00/w=800",
-    "https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/316d1761-fd79-4ca9-b8d4-f2bb20521a00/w=800",
+const FoldersLista = [
+    folder1,
+    folder2,
+    folder3,
+    folder4,
+    folder5,
+    folder6,
 ]
 
-const DEFAULT_IMAGES: CoverflowImage[] = PLACEHOLDER_URLS.map((url, i) => ({
-    srcUrl: url,
-    alt: `Coverflow card ${i + 1}`,
+// ALTERAÇÃO AQUI 1/2: Mapeando corretamente para 'src' pois são imports estáticos do Next.js
+const DEFAULT_IMAGES: CoverflowImage[] = FoldersLista.map((imgObj, i) => ({
+    src: imgObj, // Atribui o objeto da imagem importada aqui
+    alt: `Folder ${i + 1}`,
 }))
 
 const GRADIENT_FALLBACKS = [
@@ -441,7 +447,8 @@ function WidgetOverlay({
 // -----------------------------------------------------------------------------
 
 const COMPONENT_DEFAULTS = {
-    images: DEFAULT_IMAGES,
+    // ALTERAÇÃO AQUI (Opcional, mas boa prática): Garantir que o default use a lista corrigida
+    images: DEFAULT_IMAGES, 
     activeWidth: 400,
     activeHeight: 600,
     restWidth: 200,
@@ -525,7 +532,7 @@ export default function CoverflowCarousel(props: Props) {
 
     const mergedProps = { ...COMPONENT_DEFAULTS, ...props }
     const {
-        images: rawImages,
+        // images: rawImages, // ALTERAÇÃO AQUI 2/2 (Parte 1): Não precisamos mais extrair images das props
         activeWidth,
         activeHeight,
         restWidth,
@@ -544,13 +551,9 @@ export default function CoverflowCarousel(props: Props) {
         renderTarget === RenderTarget.thumbnail
     const prefersReducedMotion = useReducedMotion()
 
-    const images = useMemo(
-        () =>
-            Array.isArray(rawImages) && rawImages.length > 0
-                ? rawImages
-                : DEFAULT_IMAGES,
-        [rawImages]
-    )
+    // ALTERAÇÃO AQUI 2/2 (Parte 2): Força o uso da FoldersLista (via DEFAULT_IMAGES)
+    const images = DEFAULT_IMAGES; 
+
     const count = Math.max(1, images.length)
 
     const hasLayout = !!savedLayout && !!elSize
@@ -695,30 +698,30 @@ export default function CoverflowCarousel(props: Props) {
 
     const containerStyle: React.CSSProperties = hasLayout
         ? {
-              ...style,
-              position: "absolute",
-              left: carrossel!.x * scale,
-              top: carrossel!.y * scale,
-              width: carrossel!.width * scale,
-              height: carrossel!.height * scale,
-              background: "transparent",
-              overflow: "hidden",
-              userSelect: "none",
-              touchAction: isStatic ? undefined : "pan-y",
-              outline: "none",
-              borderRadius: radius,
-          }
+            ...style,
+            position: "absolute",
+            left: carrossel!.x * scale,
+            top: carrossel!.y * scale,
+            width: carrossel!.width * scale,
+            height: carrossel!.height * scale,
+            background: "transparent",
+            overflow: "hidden",
+            userSelect: "none",
+            touchAction: isStatic ? undefined : "pan-y",
+            outline: "none",
+            borderRadius: radius,
+        }
         : {
-              ...style,
-              position: "relative",
-              background: "transparent",
-              width: "100%",
-              height: "100%",
-              overflow: "hidden",
-              userSelect: "none",
-              touchAction: isStatic ? undefined : "pan-y",
-              outline: "none",
-          }
+            ...style,
+            position: "relative",
+            background: "transparent",
+            width: "100%",
+            height: "100%",
+            overflow: "hidden",
+            userSelect: "none",
+            touchAction: isStatic ? undefined : "pan-y",
+            outline: "none",
+        }
 
     const selectable = !isStatic
     const cards = images.map((img, i) => (
