@@ -310,7 +310,7 @@ a:hover {
 .login input {
   width: 100%;
   padding: 10px 12px;
-  border: none;
+  border: 1px #5e5e5ede solid;
   border-radius: 0px;
   font-size: 14px;
   outline: none;
