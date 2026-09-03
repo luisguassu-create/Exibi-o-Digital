@@ -17,12 +17,7 @@
             type MotionValue,
         } from "framer-motion"
 
-        import folder1 from "@/app/imagens/folders/Folder 1.jpg" 
-        import folder2 from "@/app/imagens/folders/Folder 2.jpg" 
-        import folder3 from "@/app/imagens/folders/Folder 3.jpg" 
-        import folder4 from "@/app/imagens/folders/Folder 4.jpg" 
-        import folder5 from "@/app/imagens/folders/Folder 5.jpg" 
-        import folder6 from "@/app/imagens/folders/Folder 6.jpg" 
+  
 
         import { useRouter } from "next/navigation"
         import ModalSair from "@/components/moda-sairVisual"
@@ -151,13 +146,13 @@
         // Constants
         // -----------------------------------------------------------------------------
         const FoldersLista = [
-            folder1,
-            folder2,
-            folder3,
-            folder4,
-            folder5,
-            folder6,
-        ]
+    "/imagens/images.jpg",
+    "/imagens/senai.jpg",
+    "/imagens/images.jpg",
+    "/imagens/senai.jpg",
+    "/imagens/images.jpg",
+    "/imagens/senai.jpg",
+]
 
         const DEFAULT_IMAGES: CoverflowImage[] = FoldersLista.map((imgObj, i) => ({
             src: imgObj,

@@ -9,13 +9,6 @@ import styles from "./TelaModificacao.module.css";
 import WidgetCard, { CardState, WIDGET_LIBRARY } from "./WidgetCards";
 import BotaoCores from "@/app/Botao/botao-cores";
 
-import folder1 from "@/app/imagens/folders/Folder 1.jpg";
-import folder2 from "@/app/imagens/folders/Folder 2.jpg";
-import folder3 from "@/app/imagens/folders/Folder 3.jpg";
-import folder4 from "@/app/imagens/folders/Folder 4.jpg";
-import folder5 from "@/app/imagens/folders/Folder 5.jpg";
-import folder6 from "@/app/imagens/folders/Folder 6.jpg";
-
 type Props = {
   corFundo?: string;
   corFundoB?: string;
@@ -81,13 +74,13 @@ const LISTA_CORES = [
 const FOLDER_IDS = ["1", "2", "3", "4", "5", "6"];
 
 // Mesmas imagens usadas no carrossel real, para exibir o preview aqui dentro do carrosselRef
-const FOLDER_IMAGES: Record<string, any> = {
-  "1": folder1,
-  "2": folder2,
-  "3": folder3,
-  "4": folder4,
-  "5": folder5,
-  "6": folder6,
+const FOLDER_IMAGES: Record<string, string> = {
+    "1": "/imagens/images.jpg",
+    "2": "/imagens/senai.jpg",
+    "3": "/imagens/images.jpg",
+    "4": "/imagens/senai.jpg",
+    "5": "/imagens/images.jpg",
+    "6": "/imagens/senai.jpg",
 };
 
 function folderSrc(img: any): string {
