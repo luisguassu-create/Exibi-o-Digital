@@ -9,6 +9,13 @@ import styles from "./TelaModificacao.module.css";
 import WidgetCard, { CardState, WIDGET_LIBRARY } from "./WidgetCards";
 import BotaoCores from "@/app/Botao/botao-cores";
 
+import folder1 from "@/app/imagens/folders/Folder 1.jpg";
+import folder2 from "@/app/imagens/folders/Folder 2.jpg";
+import folder3 from "@/app/imagens/folders/Folder 3.jpg";
+import folder4 from "@/app/imagens/folders/Folder 4.jpg";
+import folder5 from "@/app/imagens/folders/Folder 5.jpg";
+import folder6 from "@/app/imagens/folders/Folder 6.jpg";
+
 type Props = {
   corFundo?: string;
   corFundoB?: string;
@@ -21,6 +28,9 @@ if (typeof window !== "undefined") {
 
 export interface SavedLayout {
   corFundo?: string;
+  // Cor de fundo da tela de VISUALIZAÇÃO a ser usada quando cada folder estiver ativo
+  // (chave = "1".."6"). Não pinta o card/imagem do folder, só o fundo da tela.
+  folderBackgrounds?: Record<string, string>;
   elSize: { width: number; height: number };
   carrossel: { x: number; y: number; width: number; height: number };
   widgets: {
@@ -66,6 +76,26 @@ const LISTA_CORES = [
   "linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%)",
   "linear-gradient(135deg, #4a00e0 0%, #8e2de2 0%, #800020 50%, #e60039 100%)",
 ];
+
+// Ids dos folders existentes na tela de visualização (CoverflowCarousel -> FoldersLista)
+const FOLDER_IDS = ["1", "2", "3", "4", "5", "6"];
+
+// Mesmas imagens usadas no carrossel real, para exibir o preview aqui dentro do carrosselRef
+const FOLDER_IMAGES: Record<string, any> = {
+  "1": folder1,
+  "2": folder2,
+  "3": folder3,
+  "4": folder4,
+  "5": folder5,
+  "6": folder6,
+};
+
+function folderSrc(img: any): string {
+  if (!img) return "";
+  if (typeof img === "string") return img;
+  if (typeof img === "object" && img.src) return img.src;
+  return "";
+}
 
 const initialCards: CardState[] = WIDGET_LIBRARY.map((w) => ({
   id: `widget-${w.type}`,
@@ -234,6 +264,109 @@ function ResizeHandles({
   );
 }
 
+// -----------------------------------------------------------------------------
+// Preview: mostra UM folder por vez, do tamanho do carrosselRef (como no carrossel real)
+// -----------------------------------------------------------------------------
+function FolderSinglePreview({
+  folderId,
+  onPrev,
+  onNext,
+}: {
+  folderId: string;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  const img = FOLDER_IMAGES[folderId];
+
+  return (
+    <div style={{ position: "absolute", inset: 0, zIndex: 1 }}>
+      <img
+        src={folderSrc(img)}
+        alt={`Folder ${folderId}`}
+        draggable={false}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          display: "block",
+          pointerEvents: "none",
+          userSelect: "none",
+        }}
+      />
+
+      <span
+        style={{
+          position: "absolute",
+          top: 10,
+          right: 12,
+          fontSize: 12,
+          fontWeight: 600,
+          color: "white",
+          background: "rgba(0,0,0,0.45)",
+          padding: "3px 9px",
+          borderRadius: 999,
+          pointerEvents: "none",
+        }}
+      >
+        {folderId} / {FOLDER_IDS.length}
+      </span>
+
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onPrev();
+        }}
+        style={{
+          position: "absolute",
+          left: 10,
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: 34,
+          height: 34,
+          borderRadius: "50%",
+          border: "none",
+          background: "rgba(255,255,255,0.9)",
+          color: "black",
+          fontSize: 18,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          zIndex: 2,
+        }}
+      >
+        ‹
+      </button>
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onNext();
+        }}
+        style={{
+          position: "absolute",
+          right: 10,
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: 34,
+          height: 34,
+          borderRadius: "50%",
+          border: "none",
+          background: "rgba(255,255,255,0.9)",
+          color: "black",
+          fontSize: 18,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          zIndex: 2,
+        }}
+      >
+        ›
+      </button>
+    </div>
+  );
+}
+
 export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [salvando, setSalvando] = useState(false);
@@ -241,7 +374,18 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
   const [cards, setCards] = useState<CardState[]>(initialCards);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  // Cor de fundo padrão da tela (usada quando o alvo é "Fundo da Tela" ou quando
+  // um folder não tem cor própria definida)
   const [corClicada, setCorClicada] = useState<string>(corFundo || "white");
+
+  // Alvo da paleta de cores: "fundo" | "todos" | "1".."6"
+  const [folderTarget, setFolderTarget] = useState<string>("fundo");
+  // Cor de fundo da VISUALIZAÇÃO associada a cada folder (não pinta o card)
+  const [folderBackgrounds, setFolderBackgrounds] = useState<Record<string, string>>({});
+
+  // Qual folder está sendo mostrado no preview dentro do carrosselRef (tamanho real)
+  const [previewFolderId, setPreviewFolderId] = useState<string>("1");
 
   const elSizeRef = useRef<{ width: number; height: number }>({ width: 0, height: 0 });
   const carrosselBoxRef = useRef<{ x: number; y: number; width: number; height: number }>({
@@ -300,7 +444,6 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
   // ---------------------------------------------------------------------------
   useEffect(() => {
     if (isExpanded) {
-      // Animação Stagger nos Cards da Sidebar
       const elements = Array.from(cardNodeRefs.current.values());
       if (elements.length > 0) {
         gsap.fromTo(
@@ -310,7 +453,6 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
         );
       }
 
-      // Animação nos botões da paleta de cores
       if (listaCoresRef.current) {
         gsap.fromTo(
           listaCoresRef.current.children,
@@ -327,9 +469,34 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
     }
   }, [isExpanded]);
 
+  // Sempre que o alvo selecionado (select) for um folder específico, o preview
+  // dentro do carrosselRef passa a mostrar aquele folder
+  useEffect(() => {
+    if (FOLDER_IDS.includes(folderTarget)) {
+      setPreviewFolderId(folderTarget);
+    }
+  }, [folderTarget]);
+
+  // Aplica a cor clicada de acordo com o alvo atual. IMPORTANTE: a cor nunca pinta
+  // a imagem do folder (card) — ela define o FUNDO da tela de visualização.
+  // "fundo" -> fundo padrão da tela
+  // "todos" -> mesmo fundo para todos os folders de uma vez (depois dá pra ajustar um por um)
+  // "1".."6" -> fundo específico daquele folder quando ele estiver ativo na visualização
   const mudarCor = (novaCor: string) => {
-    setCorClicada(novaCor);
-    // Efeito visual na transição de cor de fundo
+    if (folderTarget === "fundo") {
+      setCorClicada(novaCor);
+    } else if (folderTarget === "todos") {
+      setFolderBackgrounds(() => {
+        const next: Record<string, string> = {};
+        FOLDER_IDS.forEach((id) => {
+          next[id] = novaCor;
+        });
+        return next;
+      });
+    } else {
+      setFolderBackgrounds((prev) => ({ ...prev, [folderTarget]: novaCor }));
+    }
+
     if (telaAnimacaoRef.current) {
       gsap.fromTo(
         telaAnimacaoRef.current,
@@ -337,6 +504,15 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
         { scale: 1, duration: 0.3, ease: "power1.out" }
       );
     }
+  };
+
+  const cyclePreviewFolder = (dir: 1 | -1) => {
+    const idx = FOLDER_IDS.indexOf(previewFolderId);
+    const nextIdx = ((idx + dir) % FOLDER_IDS.length + FOLDER_IDS.length) % FOLDER_IDS.length;
+    const nextId = FOLDER_IDS[nextIdx];
+    setPreviewFolderId(nextId);
+    // Também passa a ser o alvo da paleta, pra facilitar: já navega e já seleciona pra colorir
+    setFolderTarget(nextId);
   };
 
   useEffect(() => {
@@ -354,6 +530,7 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
       if (raw) {
         const saved: SavedLayout = JSON.parse(raw);
         if (saved.corFundo) setCorClicada(saved.corFundo);
+        if (saved.folderBackgrounds) setFolderBackgrounds(saved.folderBackgrounds);
         setCards((prev) =>
           prev.map((c) => {
             const found = saved.widgets.find((w) => w.id === c.id);
@@ -519,7 +696,6 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
           if (isExpanded && card.placed) {
             setSelectedId(card.id);
           }
-          // Micro-bounce visual ao clicar para arrastar
           gsap.to(node, { scale: 1.03, duration: 0.15, ease: "power1.out" });
         },
 
@@ -718,7 +894,6 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
     if (salvando) return;
     setSalvando(true);
 
-    // Efeito pulsing/pulse no botão de salvar via GSAP
     if (botao.current) {
       gsap.to(botao.current, { scale: 0.95, duration: 0.1, yoyo: true, repeat: 1 });
     }
@@ -741,6 +916,7 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
 
     const layout: SavedLayout = {
       corFundo: corClicada,
+      folderBackgrounds,
       elSize: elSizeRef.current,
       carrossel: carrosselBoxRef.current,
       widgets: cards
@@ -799,6 +975,20 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
     </div>
   );
 
+  // Rótulo dinâmico do alvo atualmente selecionado, mostrado acima da paleta de cores
+  const targetLabel =
+    folderTarget === "fundo"
+      ? "Fundo da Tela"
+      : folderTarget === "todos"
+        ? "Todos os Folders"
+        : `Folder ${folderTarget}`;
+
+  // Cor mostrada AGORA como fundo do preview (visualizacaoCard), refletindo o alvo selecionado
+  const previewBackground =
+    folderTarget === "fundo" || folderTarget === "todos"
+      ? corClicada
+      : folderBackgrounds[folderTarget] ?? corClicada;
+
   return (
     <div ref={containerRef} className={styles.container}>
       <div
@@ -810,8 +1000,27 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
           }
         }}
       >
+        <select
+  value={folderTarget}
+  onChange={(e) => setFolderTarget(e.target.value)}
+  style={{
+    opacity: 1,
+    width: "20%",
+  }}
+>
+  <option value="fundo">Fundo da Tela</option>
+  <option value="todos">Todos os Folders</option>
+  {FOLDER_IDS.map((id) => (
+    <option key={id} value={id}>
+      Folder {id}
+    </option>
+  ))}
+</select>
+
+
+
         <section
-          style={getBackgroundStyle(corClicada)}
+          style={{ ...getBackgroundStyle(previewBackground), transition: "background-color 0.3s ease" }}
           className={`VizualizacaoCard ${styles.visualizacaoCard}`}
           onClick={(e) => {
             e.stopPropagation();
@@ -826,12 +1035,20 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
               boxSizing: "border-box",
               cursor: isExpanded ? "grab" : "default",
               background: "linear-gradient(180deg, rgb(51, 52, 60) 0%, rgb(38, 39, 45) 100%)",
+              overflow: "hidden",
             }}
             onClick={(e) => {
               e.stopPropagation();
               if (isExpanded) setSelectedId("carrossel");
             }}
           >
+            {/* Apenas UM folder por vez, do tamanho do carrosselRef — igual ao card ativo real */}
+            <FolderSinglePreview
+              folderId={previewFolderId}
+              onPrev={() => cyclePreviewFolder(-1)}
+              onNext={() => cyclePreviewFolder(1)}
+            />
+
             {isExpanded && selectedId === "carrossel" && (
               <ResizeHandles
                 targetRef={carrosselRef as React.RefObject<HTMLElement>}
@@ -942,24 +1159,39 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
       >
         <section className={styles.baixoCard}>
           <div
-            ref={listaCoresRef}
             style={{
               display: "flex",
-              justifyContent: "center",
+              flexDirection: "column",
               alignItems: "center",
-              gap: "20px",
+              justifyContent: "center",
+              gap: 10,
               width: "100%",
               height: "100%",
-              flexWrap: "wrap",
             }}
           >
-            {LISTA_CORES.map((cor, index) => (
-              <BotaoCores
-                key={index}
-                corFundoB={cor}
-                onClick={() => mudarCor(cor)}
-              />
-            ))}
+            <span style={{ color: "white", fontSize: 12, opacity: 0.75 }}>
+              Fundo da visualização quando ativo: <strong>{targetLabel}</strong>
+            </span>
+
+            <div
+              ref={listaCoresRef}
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "20px",
+                width: "100%",
+                flexWrap: "wrap",
+              }}
+            >
+              {LISTA_CORES.map((cor, index) => (
+                <BotaoCores
+                  key={index}
+                  corFundoB={cor}
+                  onClick={() => mudarCor(cor)}
+                />
+              ))}
+            </div>
           </div>
         </section>
       </div>

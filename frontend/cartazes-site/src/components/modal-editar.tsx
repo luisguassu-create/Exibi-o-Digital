@@ -9,20 +9,86 @@ gsap.registerPlugin(useGSAP);
 type ModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  // Opcional: passe os dados iniciais do item sendo editado
+  initialData?: FormData;
 };
 
-export default function Modal({ isOpen, onClose }: ModalProps) {
+interface FormData {
+  imagem: File | null;
+  nome: string;
+  inicio: string;
+  fim: string;
+  ordem: string;
+  duracao: string;
+}
+
+const defaultData: FormData = {
+  imagem: null,
+  nome: "",
+  inicio: "",
+  fim: "",
+  ordem: "",
+  duracao: "",
+};
+
+export default function ModalEdicao({ isOpen, onClose, initialData }: ModalProps) {
   const [salvando, setSalvando] = useState(false);
   const [renderizado, setRenderizado] = useState(false);
 
+  // Dados atuais do formulário e cópia dos dados originais para comparação
+  const [formData, setFormData] = useState<FormData>(defaultData);
+  const [originalData, setOriginalData] = useState<FormData>(defaultData);
+  
+  // Botão inicia DESATIVADO (false) até que algo seja mudado
+  const [isDirty, setIsDirty] = useState(false);
+
   const overlayRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const btnSalvarRef = useRef<HTMLButtonElement>(null);
 
+  // Reseta os dados e o estado ao abrir o modal
   useEffect(() => {
     if (isOpen) {
+      const base = initialData || defaultData;
+      setFormData(base);
+      setOriginalData(base);
+      setIsDirty(false); // <--- Inicia desativado por padrão
       setRenderizado(true);
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
+
+  // Manipulador de mudança nos inputs + Verificação de alteração real
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value, files } = e.target;
+    const newValue = files ? files[0] || null : value;
+
+    const updatedForm = {
+      ...formData,
+      [id]: newValue,
+    };
+
+    setFormData(updatedForm);
+
+    // Compara se o estado atual é diferente do original
+    const mudou = JSON.stringify(updatedForm) !== JSON.stringify(originalData);
+    setIsDirty(mudou);
+  };
+
+  // Animação do botão ativando quando 'isDirty' vira true
+  useGSAP(() => {
+    if (isDirty && btnSalvarRef.current) {
+      gsap.fromTo(
+        btnSalvarRef.current,
+        { scale: 0.8, rotation: -5 },
+        {
+          scale: 1,
+          rotation: 0,
+          duration: 0.5,
+          ease: "elastic.out(1.2, 0.4)",
+        }
+      );
+    }
+  }, { dependencies: [isDirty] });
 
   useGSAP(
     () => {
@@ -35,7 +101,6 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
       const itens = Array.from(modal.querySelectorAll("[data-anim]"));
 
       if (isOpen) {
-        // Inicializa opacidade zerada (o blur de 8px já fica preparado no CSS)
         gsap.set(overlay, { autoAlpha: 0 });
 
         gsap.set(modal, {
@@ -55,7 +120,6 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
 
         const tl = gsap.timeline();
 
-        // Animação de entrada do fundo com Blur 8px suave
         tl.to(overlay, {
           autoAlpha: 1,
           duration: 0.6,
@@ -98,7 +162,6 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
             "-=1.1"
           );
       } else {
-        // Animação de saída
         const tl = gsap.timeline({
           onComplete: () => setRenderizado(false),
         });
@@ -140,6 +203,8 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
   );
 
   function handleSalvar() {
+    if (!isDirty) return;
+
     setSalvando(true);
 
     setTimeout(() => {
@@ -160,7 +225,6 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
           position: "fixed",
           inset: 0,
           background: "rgba(0, 0, 0, 0.55)",
-          // Efeito Blur 8px idêntico ao seu modal de referência
           backdropFilter: "blur(8px)",
           WebkitBackdropFilter: "blur(8px)",
           isolation: "isolate",
@@ -195,6 +259,7 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
           backfaceVisibility: "hidden",
           WebkitFontSmoothing: "antialiased",
           transformStyle: "preserve-3d",
+          fontFamily: "inherit", // Garante a mesma tipografia do projeto
         }}
       >
         <section>
@@ -214,7 +279,7 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
               }}
               className="textocomborda"
             >
-              Menu de Edição
+              Editar Item
             </h1>
 
             <button
@@ -261,18 +326,21 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
                   fontWeight: 600,
                   marginBottom: "8px",
                   color: "white",
+                  fontSize: "1rem",
                 }}
               >
-                Editar Imagem
+                Imagem
               </label>
 
               <input
                 id="imagem"
                 type="file"
+                onChange={handleChange}
                 style={{
                   backgroundColor: "rgb(44, 44, 51)",
                   color: "white",
                   border: "none",
+                  fontFamily: "inherit",
                 }}
                 className="hoverChoose"
               />
@@ -302,16 +370,20 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
                     color: "rgb(255, 255, 255)",
                   }}
                 >
-                  Editar Nome
+                  Nome
                 </label>
 
                 <input
                   id="nome"
                   type="text"
+                  value={formData.nome}
+                  onChange={handleChange}
                   style={{
                     padding: "6px",
+                    color: "white",
                     borderRadius: "6px",
                     border: "1px solid #cbd5e1",
+                    fontFamily: "inherit",
                   }}
                 />
               </div>
@@ -331,17 +403,20 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
                     color: "rgb(255, 255, 255)",
                   }}
                 >
-                  Inicio
+                  Início
                 </label>
 
                 <input
                   id="inicio"
                   type="datetime-local"
+                  value={formData.inicio}
+                  onChange={handleChange}
                   style={{
                     color: "white",
                     padding: "6px",
                     borderRadius: "6px",
                     border: "1px solid #cbd5e1",
+                    fontFamily: "inherit",
                   }}
                 />
               </div>
@@ -367,11 +442,14 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
                 <input
                   id="fim"
                   type="datetime-local"
+                  value={formData.fim}
+                  onChange={handleChange}
                   style={{
                     padding: "6px",
                     color: "white",
                     borderRadius: "6px",
                     border: "1px solid #cbd5e1",
+                    fontFamily: "inherit",
                   }}
                 />
               </div>
@@ -397,10 +475,14 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
                 <input
                   id="ordem"
                   type="number"
+                  value={formData.ordem}
+                  onChange={handleChange}
                   style={{
                     padding: "6px",
                     borderRadius: "6px",
+                    color: "white",
                     border: "1px solid #cbd5e1",
+                    fontFamily: "inherit",
                   }}
                 />
               </div>
@@ -420,16 +502,20 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
                     color: "rgb(255, 255, 255)",
                   }}
                 >
-                  Duracao (s)
+                  Duração (s)
                 </label>
 
                 <input
                   id="duracao"
                   type="number"
+                  value={formData.duracao}
+                  onChange={handleChange}
                   style={{
                     padding: "6px",
                     borderRadius: "6px",
+                    color: "white",
                     border: "1px solid #cbd5e1",
+                    fontFamily: "inherit",
                   }}
                 />
               </div>
@@ -444,19 +530,23 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
                 }}
               >
                 <button
+                  ref={btnSalvarRef}
                   onClick={handleSalvar}
-                  disabled={salvando}
+                  disabled={salvando || !isDirty}
                   style={{
                     width: "110px",
                     height: "36px",
                     color: "white",
                     fontWeight: 600,
+                    fontFamily: "inherit",
                     backgroundColor: salvando
                       ? "rgb(151, 104, 104)"
-                      : "hsl(0, 50%, 36%)",
+                      : isDirty
+                      ? "hsl(0, 70%, 45%)" // Vermelho ativo só quando houver mudança
+                      : "rgb(100, 100, 100)", // Cinza padrão desativado
                     border: "none",
                     borderRadius: "8px",
-                    cursor: salvando ? "default" : "pointer",
+                    cursor: salvando || !isDirty ? "not-allowed" : "pointer",
                     transition:
                       "background-color 0.3s ease, transform 0.15s ease",
                     transform: salvando ? "scale(0.96)" : "scale(1)",
@@ -472,6 +562,7 @@ export default function Modal({ isOpen, onClose }: ModalProps) {
                     height: "36px",
                     color: "white",
                     fontWeight: 600,
+                    fontFamily: "inherit",
                     backgroundColor: "rgb(86, 86, 86)",
                     border: "none",
                     borderRadius: "8px",

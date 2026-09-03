@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { CardCartaz } from "@/app/Cartao/card-to-cartazes";
 import { Bot } from "@/app/Botao/botao-criar";
 import { Bote } from "@/app/Botao/botao-ee";
+import { QuebraExpectativa } from "@/components/QuebraExpectativa";
 
 export default function Cartzes() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -73,6 +74,7 @@ export default function Cartzes() {
         corFundo={""}
         textoBaixo={"Dia 15 ate o 35"} textoLado={"13:00 ate 15:00"}
       />
+     
     </div>
   );
 }
