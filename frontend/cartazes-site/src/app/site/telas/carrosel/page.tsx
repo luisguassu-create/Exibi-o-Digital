@@ -9,6 +9,13 @@ import styles from "./TelaModificacao.module.css";
 import WidgetCard, { CardState, WIDGET_LIBRARY } from "./WidgetCards";
 import BotaoCores from "@/app/Botao/botao-cores";
 
+import folder1 from "@/app/imagens/folders/Folder 1.jpg";
+import folder2 from "@/app/imagens/folders/Folder 2.jpg";
+import folder3 from "@/app/imagens/folders/Folder 3.jpg";
+import folder4 from "@/app/imagens/folders/Folder 4.jpg";
+import folder5 from "@/app/imagens/folders/Folder 5.jpg";
+import folder6 from "@/app/imagens/folders/Folder 6.jpg";
+
 type Props = {
   corFundo?: string;
   corFundoB?: string;
@@ -55,32 +62,21 @@ export const STORAGE_KEY = "tela-modificacao-layout";
 export const LAYOUT_UPDATED_EVENT = "tela-modificacao-layout-updated";
 
 const LISTA_CORES = [
-  "white", "blue", "red", "purple", "yellow", "orange", "black",
-  "linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%)",
-  "linear-gradient(135deg, #00c6ff 0%, #0072ff 100%)",
-  "linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)",
-  "linear-gradient(135deg, #12100e 0%, #2b1055 50%, #7597de 100%)",
-  "linear-gradient(135deg, #051937 0%, #004d7a 33%, #008793 66%, #00bf72 100%)",
-  "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
-  "linear-gradient(45deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)",
-  "linear-gradient(135deg, #2b0000 0%, #800000 50%, #b30000 100%)",
-  "linear-gradient(135deg, #ed213a 0%, #931d25 100%)",
-  "linear-gradient(135deg, #ff0844 0%, #ffb199 100%)",
-  "linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%)",
-  "linear-gradient(135deg, #4a00e0 0%, #8e2de2 0%, #800020 50%, #e60039 100%)",
+  " rgb(29, 26, 37)", "rgb( 247, 247, 247 )",
+  "linear-gradient(135deg, #CA334C 0%, #BE2D45 100%, #97233B 100%)",
 ];
 
 // Ids dos folders existentes na tela de visualização (CoverflowCarousel -> FoldersLista)
 const FOLDER_IDS = ["1", "2", "3", "4", "5", "6"];
 
 // Mesmas imagens usadas no carrossel real, para exibir o preview aqui dentro do carrosselRef
-const FOLDER_IMAGES: Record<string, string> = {
-    "1": "/imagens/images.jpg",
-    "2": "/imagens/senai.jpg",
-    "3": "/imagens/images.jpg",
-    "4": "/imagens/senai.jpg",
-    "5": "/imagens/images.jpg",
-    "6": "/imagens/senai.jpg",
+const FOLDER_IMAGES: Record<string, any> = {
+  "1": folder1,
+  "2": folder2,
+  "3": folder3,
+  "4": folder4,
+  "5": folder5,
+  "6": folder6,
 };
 
 function folderSrc(img: any): string {
@@ -165,7 +161,7 @@ function ResizeHandles({
 
     try {
       (e.currentTarget as Element).setPointerCapture(e.pointerId);
-    } catch {}
+    } catch { }
 
     dragRef.current = {
       handle,
@@ -396,7 +392,7 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
   const baixoRef = useRef<HTMLDivElement | null>(null);
   const botao = useRef<HTMLDivElement | null>(null);
   const listaCoresRef = useRef<HTMLDivElement | null>(null);
-
+  const seletorRef = useRef<HTMLDivElement | null>(null);
   const originalRectRef = useRef<{ top: number; left: number; width: number; height: number } | null>(null);
   const draggableInstanceRef = useRef<globalThis.Draggable[] | null>(null);
   const isAnimatingRef = useRef(false);
@@ -550,7 +546,7 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
           });
         }
       }
-    } catch {}
+    } catch { }
   }, []);
 
   useEffect(() => {
@@ -815,7 +811,7 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
     if (side) {
       gsap.set(side, {
         marginTop: "0px",
-        marginRight: "-500px",
+        marginRight: "-43 0px",
         opacity: 0,
         scaleX: 1.55,
         scaleY: 0.85,
@@ -835,7 +831,7 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
 
     tl.fromTo(b, { top: 570 }, { top: 860, duration: 0.7, ease: "expo.out" })
       .fromTo(el, { position: "fixed", top: rect.top, left: rect.left, width: rect.width, height: rect.height, zIndex: 1000 }, { top: 100, left: 20, width: "70vw", height: "80vh", duration: 0.9, ease: "expo.out" }, "<")
-      .fromTo(baixo, { top: "100%", opacity: 0 }, { top: 875, opacity: 1, duration: 0.7, ease: "expo.out" }, "-=0.7")
+      .fromTo(baixo, { top: "100%", opacity: 0 }, { top: 875, opacity: 1, duration: 0.7, marginRight: "15px", ease: "expo.out" }, "-=0.7")
       .fromTo(carrossel, { width: "30%", height: "80%", borderRadius: "10px", scale: 0.85, opacity: 0.5 }, { width: "30%", height: "80%", borderRadius: "10px", scale: carrosselTransform.scale, opacity: 1, duration: 0.6, ease: "back.out(2.2)" }, "-=0.5");
 
     if (side) {
@@ -879,7 +875,7 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(layout));
       window.dispatchEvent(new CustomEvent(LAYOUT_UPDATED_EVENT, { detail: layout }));
-    } catch {}
+    } catch { }
     onSave?.(layout);
   }
 
@@ -950,7 +946,7 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
     WIDGET_LIBRARY.find((w) => w.type === type)?.label ?? type;
 
   const botoesNode = (
-    <div ref={botao} className={styles.botoesWrapper} style={{ top: 590 }}>
+    <div ref={botao} className={styles.botoesWrapper} style={{ marginTop: "40px" }}>
       <button onClick={handleEditLayout} className={styles.botaoEditLay}>
         {isExpanded ? "Sair da Edição" : "Editar Layout"}
       </button>
@@ -994,23 +990,21 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
         }}
       >
         <select
-  value={folderTarget}
-  onChange={(e) => setFolderTarget(e.target.value)}
-  style={{
-    opacity: 1,
-    width: "20%",
-  }}
->
-  <option value="fundo">Fundo da Tela</option>
-  <option value="todos">Todos os Folders</option>
-  {FOLDER_IDS.map((id) => (
-    <option key={id} value={id}>
-      Folder {id}
-    </option>
-  ))}
-</select>
-
-
+          value={folderTarget}
+          onChange={(e) => setFolderTarget(e.target.value)}
+          style={{
+            opacity: 1,
+            width: "20%",
+          }}
+        >
+          <option value="fundo">Fundo da Tela</option>
+          <option value="todos">Todos os Folders</option>
+          {FOLDER_IDS.map((id) => (
+            <option key={id} value={id}>
+              Folder {id}
+            </option>
+          ))}
+        </select>
 
         <section
           style={{ ...getBackgroundStyle(previewBackground), transition: "background-color 0.3s ease" }}
@@ -1090,7 +1084,7 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
                   e.stopPropagation();
                   if (isExpanded) setSelectedId(card.id);
                 }}
-              >
+              > 
                 <WidgetCard
                   card={card}
                   label={widgetLabel(card.type)}
@@ -1188,6 +1182,7 @@ export default function TelaModificacao({ corFundo, corFundoB, onSave }: Props) 
           </div>
         </section>
       </div>
+
     </div>
   );
 }
