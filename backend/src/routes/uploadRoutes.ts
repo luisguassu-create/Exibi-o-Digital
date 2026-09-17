@@ -30,7 +30,7 @@ router.post("/", upload.single("imagem"), (req, res) => {
     });
   }
 
-  const caminho = `http://localhost:3000/uploads/${req.file.filename}`;
+  const caminho = `http://localhost:3001/uploads/${req.file.filename}`;
 
   res.status(201).json({
     mensagem: "Imagem enviada com sucesso.",
