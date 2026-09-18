@@ -271,6 +271,7 @@ export default function Home() {
             onBlur={(e) => handleBlur(e.target.parentElement!)}
             style={{
               borderRadius: "10px",
+              // border: "1px rgb(154, 154, 154) solid",
               height: "30px",
             }}
           />

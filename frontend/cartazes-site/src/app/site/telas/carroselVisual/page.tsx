@@ -1,4 +1,4 @@
-  "use client"
+        "use client"
 
         // Coverflow Carousel — Originkit
         // Conectado à Tela de Modificação: lê o layout salvo e aplica na tela de visualização.
