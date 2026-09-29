@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const cartazController_1 = require("../controllers/cartazController");
+const router = (0, express_1.Router)();
+router.get("/", cartazController_1.listarCartazes);
+router.get("/:id", cartazController_1.buscarCartaz);
+router.post("/", cartazController_1.criarCartaz);
+router.put("/:id", cartazController_1.atualizarCartaz);
+router.delete("/:id", cartazController_1.deletarCartaz);
+exports.default = router;
